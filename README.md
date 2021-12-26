@@ -3,6 +3,9 @@ Jadis is a simple **Ja**va bytecode **Dis**assembler written in Rust. The goal o
 
 Please note that Jadis is an educational project. This means that for any serious work, you should consider using the Java disassembler that came with your JDK.
 
+This specific disassembler has been written using the Java Virtual Machine Specification for Java SE 17 edition.
+You can find the full specification file here: [https://docs.oracle.com/javase/specs/jvms/se17/html/index.html](https://docs.oracle.com/javase/specs/jvms/se17/html/index.html)
+
 ## Goals
 - [ ] Learn how Java's bytecode is structured.
 - [ ] Parse JVM bytecode.

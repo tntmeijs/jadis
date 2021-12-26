@@ -1,0 +1,12 @@
+[package]
+name = "jadis"
+version = "0.1.0"
+edition = "2018"
+authors = ["Tahar Meijs"]
+description = "A simple Java bytecode disassembler written in Rust."
+repository = "https://github.com/tntmeijs/jadis"
+license-file = "./LICENSE"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
