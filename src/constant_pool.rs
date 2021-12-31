@@ -60,7 +60,10 @@ pub enum Tag {
 
 /// Represents an entity in the constant pool
 pub struct ConstantPoolInfo {
+    /// Identifies the type of data this entity represents
     tag: Tag,
+
+    /// Data associated with this entity
     data: Vec<u8>,
 }
 

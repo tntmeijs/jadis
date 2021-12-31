@@ -75,6 +75,9 @@
 <span id="73">73</span>
 <span id="74">74</span>
 <span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
 </pre><pre class="rust">
 <span class="doccomment">//! Represents an entity in the constant pool section of a class file</span>
 <span class="doccomment">//!</span>
@@ -138,7 +141,10 @@
 
 <span class="doccomment">/// Represents an entity in the constant pool</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ConstantPoolInfo</span> {
+    <span class="doccomment">/// Identifies the type of data this entity represents</span>
     <span class="ident">tag</span>: <span class="ident">Tag</span>,
+
+    <span class="doccomment">/// Data associated with this entity</span>
     <span class="ident">data</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 }
 

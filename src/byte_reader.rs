@@ -5,7 +5,10 @@
 
 /// Binary file reader
 pub struct ByteReader {
+    /// Binary data as bytes
     data: Vec<u8>,
+
+    /// Current read index into the byte buffer
     position: usize,
 }
 

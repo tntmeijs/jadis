@@ -8,10 +8,19 @@ use crate::constant_pool::ConstantPoolInfo;
 
 /// JVM class file representation
 pub struct ClassFile {
+    /// Magic number - should always equal 0xCAFEBABE
     pub magic: u32,
+
+    /// Bytecode minor version
     pub minor_version: u16,
+
+    /// Bytecode major version
     pub major_version: u16,
+
+    /// Number of items in the constant pool plus one
     pub constant_pool_count: u16,
+
+    /// Constant pool
     pub constant_pool: Vec<ConstantPoolInfo>,
 }
 

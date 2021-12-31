@@ -24,17 +24,31 @@ pub enum DisassemblerVisibility {
 
 /// Data needed to create a disassembler
 pub struct DisassemberConfig {
+    /// Class and member visibility setting
     visibility: DisassemblerVisibility,
+
+    /// Indicates whether line numbers should be shown
     show_line_numbers: bool,
+
+    /// Indicates whether assembly instructions should be shown
     show_instructions: bool,
+
+    /// Indicates whether type signatures should be shown
     show_type_signatures: bool,
+
+    /// Indicates whether system information should be shown
     show_system_info: bool,
+
+    /// Indicates whether final constants should be shown
     show_final_constants: bool,
 }
 
 /// Java Virtual Machine disassembler
 pub struct Disassembler<'a> {
+    /// Used to customize the disassembler's behaviour
     config: &'a DisassemberConfig,
+
+    /// Disassembled class file information
     class: ClassFile,
 }
 
