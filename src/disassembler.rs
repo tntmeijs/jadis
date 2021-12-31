@@ -8,7 +8,6 @@
 use crate::{byte_reader::ByteReader, class_file::ClassFile};
 
 /// Controls which access level shows up in the output
-#[derive(Clone, Copy)]
 pub enum DisassemblerVisibility {
     /// Show only public classes and members
     PUBLIC,
@@ -24,7 +23,6 @@ pub enum DisassemblerVisibility {
 }
 
 /// Data needed to create a disassembler
-#[derive(Clone, Copy)]
 pub struct DisassemberConfig {
     visibility: DisassemblerVisibility,
     show_line_numbers: bool,
@@ -35,9 +33,8 @@ pub struct DisassemberConfig {
 }
 
 /// Java Virtual Machine disassembler
-#[derive(Clone, Copy)]
-pub struct Disassembler {
-    config: DisassemberConfig,
+pub struct Disassembler<'a> {
+    config: &'a DisassemberConfig,
     class: ClassFile,
 }
 
@@ -85,8 +82,8 @@ impl DisassemberConfig {
     }
 }
 
-impl Disassembler {
-    pub fn new(config: &DisassemberConfig, reader: &mut ByteReader) -> Self {
+impl<'a> Disassembler<'a> {
+    pub fn new(config: &'a DisassemberConfig, reader: &mut ByteReader) -> Self {
         let class = ClassFile::new(reader);
 
         // TODO: remove
@@ -94,9 +91,6 @@ impl Disassembler {
         println!("Magic number: {:#08x}", class.magic);
         println!("Version: {}.{}", class.major_version, class.minor_version);
 
-        Self {
-            config: *config,
-            class,
-        }
+        Self { config, class }
     }
 }

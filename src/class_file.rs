@@ -5,7 +5,7 @@
 
 use crate::byte_reader::ByteReader;
 
-#[derive(Clone, Copy)]
+/// JVM class file representation
 pub struct ClassFile {
     pub magic: u32,
     pub minor_version: u16,
