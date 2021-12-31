@@ -31,8 +31,11 @@
 //! | -V, --version | Version information |
 //! | -v, --verbose | Print additional information |
 
+mod byte_reader;
+mod class_file;
 mod disassembler;
 
+use byte_reader::ByteReader;
 use clap::{App, AppSettings, Arg};
 use disassembler::{DisassemberConfig, Disassembler, DisassemblerVisibility};
 
@@ -43,12 +46,19 @@ fn main() {
         .author(env!("CARGO_PKG_AUTHORS"))
         .about(env!("CARGO_PKG_DESCRIPTION"))
         .help_message("Print this help message")
-        .version_message("Version information")
+        .setting(AppSettings::ArgRequiredElseHelp)
+        .setting(AppSettings::DisableVersion)
+        .setting(AppSettings::AllowExternalSubcommands)
         .arg(
             Arg::with_name("verbose")
                 .short("v")
                 .long("verbose")
                 .help("Print additional information"),
+        )
+        .arg(
+            Arg::with_name("version")
+                .long("version")
+                .help("Version information"),
         )
         .arg(
             Arg::with_name("line")
@@ -138,12 +148,13 @@ fn main() {
                 .long("multi-release")
                 .help("Specify the version to use in multi-release JAR files"),
         )
-        .setting(AppSettings::ArgRequiredElseHelp)
         .get_matches();
 
     let mut disassembler_config = DisassemberConfig::new();
 
     if matches.is_present("verbose") {
+        //
+    } else if matches.is_present("version") {
         //
     } else if matches.is_present("line") {
         disassembler_config.show_line_numbers();
@@ -183,5 +194,9 @@ fn main() {
         todo!();
     }
 
-    let disassembler = Disassembler::new(&disassembler_config);
+    // The last argument should always be the class to disassemble
+    if let Some(file_to_disassemble) = std::env::args().last().to_owned() {
+        let mut file = ByteReader::new(&file_to_disassemble);
+        let disassembler = Disassembler::new(&disassembler_config, &mut file);
+    }
 }

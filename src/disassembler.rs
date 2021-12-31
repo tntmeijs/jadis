@@ -5,6 +5,8 @@
 //! Obviously it is not a direct replacement as this module has been written for educational purposes.
 //! However, the disassembler should function well enough that it can theoretically be used as a drop-in replacement for [`javap`](https://docs.oracle.com/javase/7/docs/technotes/tools/windows/javap.html).
 
+use crate::{byte_reader::ByteReader, class_file::ClassFile};
+
 /// Controls which access level shows up in the output
 #[derive(Clone, Copy)]
 pub enum DisassemblerVisibility {
@@ -33,8 +35,10 @@ pub struct DisassemberConfig {
 }
 
 /// Java Virtual Machine disassembler
+#[derive(Clone, Copy)]
 pub struct Disassembler {
     config: DisassemberConfig,
+    class: ClassFile,
 }
 
 impl DisassemberConfig {
@@ -82,7 +86,17 @@ impl DisassemberConfig {
 }
 
 impl Disassembler {
-    pub fn new(config: &DisassemberConfig) -> Self {
-        Self { config: *config }
+    pub fn new(config: &DisassemberConfig, reader: &mut ByteReader) -> Self {
+        let class = ClassFile::new(reader);
+
+        // TODO: remove
+        // DEBUG OUTPUT
+        println!("Magic number: {:#08x}", class.magic);
+        println!("Version: {}.{}", class.major_version, class.minor_version);
+
+        Self {
+            config: *config,
+            class,
+        }
     }
 }
