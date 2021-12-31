@@ -33,6 +33,7 @@
 
 mod byte_reader;
 mod class_file;
+mod constant_pool;
 mod disassembler;
 
 use byte_reader::ByteReader;
@@ -197,6 +198,6 @@ fn main() {
     // The last argument should always be the class to disassemble
     if let Some(file_to_disassemble) = std::env::args().last().to_owned() {
         let mut file = ByteReader::new(&file_to_disassemble);
-        let disassembler = Disassembler::new(&disassembler_config, &mut file);
+        Disassembler::new(&disassembler_config, &mut file);
     }
 }

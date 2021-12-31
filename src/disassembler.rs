@@ -90,6 +90,7 @@ impl<'a> Disassembler<'a> {
         // DEBUG OUTPUT
         println!("Magic number: {:#08x}", class.magic);
         println!("Version: {}.{}", class.major_version, class.minor_version);
+        println!("Constant pool count: {}", class.constant_pool_count);
 
         Self { config, class }
     }
