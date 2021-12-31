@@ -187,6 +187,22 @@
 <span id="185">185</span>
 <span id="186">186</span>
 <span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
 </pre><pre class="rust">
 <span class="doccomment">//! # Introduction</span>
 <span class="doccomment">//! The Jadis crate is a Java Virtual Machine language disassembler written in Rust.</span>
@@ -221,8 +237,12 @@
 <span class="doccomment">//! | -V, --version | Version information |</span>
 <span class="doccomment">//! | -v, --verbose | Print additional information |</span>
 
+<span class="kw">mod</span> <span class="ident">byte_reader</span>;
+<span class="kw">mod</span> <span class="ident">class_file</span>;
+<span class="kw">mod</span> <span class="ident">constant_pool</span>;
 <span class="kw">mod</span> <span class="ident">disassembler</span>;
 
+<span class="kw">use</span> <span class="ident">byte_reader::ByteReader</span>;
 <span class="kw">use</span> <span class="ident">clap</span>::{<span class="ident">App</span>, <span class="ident">AppSettings</span>, <span class="ident">Arg</span>};
 <span class="kw">use</span> <span class="ident">disassembler</span>::{<span class="ident">DisassemberConfig</span>, <span class="ident">Disassembler</span>, <span class="ident">DisassemblerVisibility</span>};
 
@@ -233,12 +253,19 @@
         .<span class="ident">author</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_AUTHORS&quot;</span>))
         .<span class="ident">about</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_DESCRIPTION&quot;</span>))
         .<span class="ident">help_message</span>(<span class="string">&quot;Print this help message&quot;</span>)
-        .<span class="ident">version_message</span>(<span class="string">&quot;Version information&quot;</span>)
+        .<span class="ident">setting</span>(<span class="ident">AppSettings::ArgRequiredElseHelp</span>)
+        .<span class="ident">setting</span>(<span class="ident">AppSettings::DisableVersion</span>)
+        .<span class="ident">setting</span>(<span class="ident">AppSettings::AllowExternalSubcommands</span>)
         .<span class="ident">arg</span>(
             <span class="ident">Arg::with_name</span>(<span class="string">&quot;verbose&quot;</span>)
                 .<span class="ident">short</span>(<span class="string">&quot;v&quot;</span>)
                 .<span class="ident">long</span>(<span class="string">&quot;verbose&quot;</span>)
                 .<span class="ident">help</span>(<span class="string">&quot;Print additional information&quot;</span>),
+        )
+        .<span class="ident">arg</span>(
+            <span class="ident">Arg::with_name</span>(<span class="string">&quot;version&quot;</span>)
+                .<span class="ident">long</span>(<span class="string">&quot;version&quot;</span>)
+                .<span class="ident">help</span>(<span class="string">&quot;Version information&quot;</span>),
         )
         .<span class="ident">arg</span>(
             <span class="ident">Arg::with_name</span>(<span class="string">&quot;line&quot;</span>)
@@ -328,12 +355,13 @@
                 .<span class="ident">long</span>(<span class="string">&quot;multi-release&quot;</span>)
                 .<span class="ident">help</span>(<span class="string">&quot;Specify the version to use in multi-release JAR files&quot;</span>),
         )
-        .<span class="ident">setting</span>(<span class="ident">AppSettings::ArgRequiredElseHelp</span>)
         .<span class="ident">get_matches</span>();
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">disassembler_config</span> <span class="op">=</span> <span class="ident">DisassemberConfig::new</span>();
 
     <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;verbose&quot;</span>) {
+        <span class="comment">//</span>
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;version&quot;</span>) {
         <span class="comment">//</span>
     } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;line&quot;</span>) {
         <span class="ident">disassembler_config</span>.<span class="ident">show_line_numbers</span>();
@@ -373,7 +401,11 @@
         <span class="macro">todo!</span>();
     }
 
-    <span class="kw">let</span> <span class="ident">disassembler</span> <span class="op">=</span> <span class="ident">Disassembler::new</span>(<span class="kw-2">&amp;</span><span class="ident">disassembler_config</span>);
+    <span class="comment">// The last argument should always be the class to disassemble</span>
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">file_to_disassemble</span>) <span class="op">=</span> <span class="ident">std::env::args</span>().<span class="ident">last</span>().<span class="ident">to_owned</span>() {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">ByteReader::new</span>(<span class="kw-2">&amp;</span><span class="ident">file_to_disassemble</span>);
+        <span class="ident">Disassembler::new</span>(<span class="kw-2">&amp;</span><span class="ident">disassembler_config</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>);
+    }
 }
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="jadis" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>

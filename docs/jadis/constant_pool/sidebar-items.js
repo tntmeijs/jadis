@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Tag","JVM constant pool info tag"]],"struct":[["ConstantPoolInfo","Represents an entity in the constant pool"]]});
