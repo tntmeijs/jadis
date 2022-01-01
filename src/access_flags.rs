@@ -1,3 +1,5 @@
+//! Contains class access and property modifiers
+
 use crate::utils::bitmask_matches;
 
 /// Class access and property modifiers
