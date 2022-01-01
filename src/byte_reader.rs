@@ -36,16 +36,4 @@ impl ByteReader {
 
         data
     }
-
-    /// Read a u16 from the current pointer into the binary blob
-    pub fn read_u16(&mut self) -> u16 {
-        let bytes = self.read_n_bytes(std::mem::size_of::<u16>());
-        (bytes[0] as u16) << 8 | bytes[1] as u16
-    }
-
-    /// Read a u32 from the current pointer into the binary blob
-    pub fn read_u32(&mut self) -> u32 {
-        let bytes = self.read_n_bytes(std::mem::size_of::<u32>());
-        (bytes[0] as u32) << 24 | (bytes[1] as u32) << 16 | (bytes[2] as u32) << 8 | bytes[3] as u32
-    }
 }

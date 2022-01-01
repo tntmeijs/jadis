@@ -35,6 +35,7 @@ mod byte_reader;
 mod class_file;
 mod constant_pool;
 mod disassembler;
+mod utils;
 
 use byte_reader::ByteReader;
 use clap::{App, AppSettings, Arg};
