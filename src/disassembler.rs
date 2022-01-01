@@ -100,8 +100,7 @@ impl<'a> Disassembler<'a> {
     pub fn new(config: &'a DisassemberConfig, reader: &mut ByteReader) -> Self {
         let class = ClassFile::new(reader);
 
-        // TODO: remove
-        // DEBUG OUTPUT
+        // TODO: remove debug printing
         println!("Magic number: {:#08x}", class.magic);
         println!("Version: {}.{}", class.major_version, class.minor_version);
         println!("Constant pool count: {}", class.constant_pool_count);
@@ -178,6 +177,12 @@ impl<'a> Disassembler<'a> {
                     println!("#{} = Package", entry.index);
                 }
             }
+        }
+
+        println!("Access flags:");
+
+        for flag in &class.access_flags {
+            println!("\t- {:?}", flag);
         }
 
         Self { config, class }

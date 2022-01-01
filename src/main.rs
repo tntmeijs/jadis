@@ -31,6 +31,7 @@
 //! | -V, --version | Version information |
 //! | -v, --verbose | Print additional information |
 
+mod access_flags;
 mod byte_reader;
 mod class_file;
 mod constant_pool;
