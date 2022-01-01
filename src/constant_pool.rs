@@ -9,6 +9,12 @@ use crate::{
     utils::{to_f32, to_f64, to_i32, to_i64, to_u16},
 };
 
+/// Base trait to store specialised constant pool data entries
+trait ConstantPoolInfoData {
+    /// Cast to the concreate type that implements this trait
+    fn as_concrete_type(&self) -> &dyn Any;
+}
+
 /// Constant pool tags
 pub enum Tag {
     /// UTF-8 string
@@ -142,9 +148,6 @@ pub struct ConstantPoolInfo {
     /// Identifies the type of data this entity represents
     pub tag: Tag,
 
-    /// Index of this entry in the constant pool
-    pub index: u16,
-
     /// Data associated with this entity
     pub data: Box<dyn ConstantPoolInfoData>,
 }
@@ -157,155 +160,176 @@ impl ConstantPoolInfo {
         match Tag::from_tag(&tag[0]) {
             Tag::ConstantUtf8 => Self {
                 tag: Tag::ConstantUtf8,
-                index,
-                data: Box::new(Self::read_data_as_utf8(reader)),
+                data: Box::new(Self::read_data_as_utf8(reader, index)),
             },
             Tag::ConstantInteger => Self {
                 tag: Tag::ConstantInteger,
-                index,
-                data: Box::new(Self::read_data_as_integer(reader)),
+                data: Box::new(Self::read_data_as_integer(reader, index)),
             },
             Tag::ConstantFloat => Self {
                 tag: Tag::ConstantFloat,
-                index,
-                data: Box::new(Self::read_data_as_float(reader)),
+
+                data: Box::new(Self::read_data_as_float(reader, index)),
             },
             Tag::ConstantLong => Self {
                 tag: Tag::ConstantLong,
-                index,
-                data: Box::new(Self::read_data_as_long(reader)),
+
+                data: Box::new(Self::read_data_as_long(reader, index)),
             },
             Tag::ConstantDouble => Self {
                 tag: Tag::ConstantDouble,
-                index,
-                data: Box::new(Self::read_data_as_double(reader)),
+
+                data: Box::new(Self::read_data_as_double(reader, index)),
             },
             Tag::ConstantClass => Self {
                 tag: Tag::ConstantClass,
-                index,
-                data: Box::new(Self::read_data_as_class(reader)),
+
+                data: Box::new(Self::read_data_as_class(reader, index)),
             },
             Tag::ConstantString => Self {
                 tag: Tag::ConstantString,
-                index,
-                data: Box::new(Self::read_data_as_string(reader)),
+
+                data: Box::new(Self::read_data_as_string(reader, index)),
             },
             Tag::ConstantFieldRef => Self {
                 tag: Tag::ConstantFieldRef,
-                index,
-                data: Box::new(Self::read_data_as_field_ref(reader)),
+
+                data: Box::new(Self::read_data_as_field_ref(reader, index)),
             },
             Tag::ConstantMethodRef => Self {
                 tag: Tag::ConstantMethodRef,
-                index,
-                data: Box::new(Self::read_data_as_method_ref(reader)),
+
+                data: Box::new(Self::read_data_as_method_ref(reader, index)),
             },
             Tag::ConstantInterfaceMethodRef => Self {
                 tag: Tag::ConstantInterfaceMethodRef,
-                index,
-                data: Box::new(Self::read_data_as_interface_method_ref(reader)),
+
+                data: Box::new(Self::read_data_as_interface_method_ref(reader, index)),
             },
             Tag::ConstantNameAndType => Self {
                 tag: Tag::ConstantNameAndType,
-                index,
-                data: Box::new(Self::read_data_as_name_and_type(reader)),
+
+                data: Box::new(Self::read_data_as_name_and_type(reader, index)),
             },
             Tag::ConstantMethodHandle => Self {
                 tag: Tag::ConstantMethodHandle,
-                index,
-                data: Box::new(Self::read_data_as_method_handle(reader)),
+
+                data: Box::new(Self::read_data_as_method_handle(reader, index)),
             },
             Tag::ConstantMethodType => Self {
                 tag: Tag::ConstantMethodType,
-                index,
-                data: Box::new(Self::read_data_as_method_type(reader)),
+
+                data: Box::new(Self::read_data_as_method_type(reader, index)),
             },
             Tag::ConstantDynamic => Self {
                 tag: Tag::ConstantDynamic,
-                index,
-                data: Box::new(Self::read_data_as_dynamic(reader)),
+
+                data: Box::new(Self::read_data_as_dynamic(reader, index)),
             },
             Tag::ConstantInvokeDynamic => Self {
                 tag: Tag::ConstantInvokeDynamic,
-                index,
-                data: Box::new(Self::read_data_as_invoke_dynamic(reader)),
+
+                data: Box::new(Self::read_data_as_invoke_dynamic(reader, index)),
             },
             Tag::ConstantModule => Self {
                 tag: Tag::ConstantModule,
-                index,
-                data: Box::new(Self::read_data_as_module(reader)),
+
+                data: Box::new(Self::read_data_as_module(reader, index)),
             },
             Tag::ConstantPackage => Self {
                 tag: Tag::ConstantPackage,
-                index,
-                data: Box::new(Self::read_data_as_package(reader)),
+                data: Box::new(Self::read_data_as_package(reader, index)),
             },
         }
     }
 
     /// Read the data blob as an UTF-8 constant pool entry
-    fn read_data_as_utf8(reader: &mut ByteReader) -> ConstantUtf8Info {
+    fn read_data_as_utf8(reader: &mut ByteReader, constant_pool_index: u16) -> ConstantUtf8Info {
         let length = to_u16(reader.read_n_bytes(2));
 
         ConstantUtf8Info {
+            constant_pool_index,
             length,
             string: String::from_utf8_lossy(&reader.read_n_bytes(usize::from(length))).to_string(),
         }
     }
 
     /// Read the data blob as an integer constant pool entry
-    fn read_data_as_integer(reader: &mut ByteReader) -> ConstantIntegerInfo {
+    fn read_data_as_integer(
+        reader: &mut ByteReader,
+        constant_pool_index: u16,
+    ) -> ConstantIntegerInfo {
         ConstantIntegerInfo {
+            constant_pool_index,
             value: to_i32(&reader.read_n_bytes(4)),
         }
     }
 
     /// Read the data blob as a float constant pool entry
-    fn read_data_as_float(reader: &mut ByteReader) -> ConstantFloatInfo {
+    fn read_data_as_float(reader: &mut ByteReader, constant_pool_index: u16) -> ConstantFloatInfo {
         ConstantFloatInfo {
+            constant_pool_index,
             value: to_f32(&reader.read_n_bytes(4)),
         }
     }
 
     /// Read the data blob as a long constant pool entry
-    fn read_data_as_long(reader: &mut ByteReader) -> ConstantLongInfo {
+    fn read_data_as_long(reader: &mut ByteReader, constant_pool_index: u16) -> ConstantLongInfo {
         ConstantLongInfo {
+            constant_pool_index,
             value: to_i64(&reader.read_n_bytes(8)),
         }
     }
 
     /// Read the data blob as a double constant pool entry
-    fn read_data_as_double(reader: &mut ByteReader) -> ConstantDoubleInfo {
+    fn read_data_as_double(
+        reader: &mut ByteReader,
+        constant_pool_index: u16,
+    ) -> ConstantDoubleInfo {
         ConstantDoubleInfo {
+            constant_pool_index,
             value: to_f64(&reader.read_n_bytes(8)),
         }
     }
 
     /// Read the data blob as a class constant pool entry
-    fn read_data_as_class(reader: &mut ByteReader) -> ConstantClassInfo {
+    fn read_data_as_class(reader: &mut ByteReader, constant_pool_index: u16) -> ConstantClassInfo {
         ConstantClassInfo {
+            constant_pool_index,
             name_index: to_u16(&reader.read_n_bytes(2)),
         }
     }
 
     /// Read the data blob as a string constant pool entry
-    fn read_data_as_string(reader: &mut ByteReader) -> ConstantStringInfo {
+    fn read_data_as_string(
+        reader: &mut ByteReader,
+        constant_pool_index: u16,
+    ) -> ConstantStringInfo {
         ConstantStringInfo {
+            constant_pool_index,
             string_index: to_u16(&reader.read_n_bytes(2)),
         }
     }
 
     /// Read the data blob as a field reference constant pool entry
-    fn read_data_as_field_ref(reader: &mut ByteReader) -> ConstantFieldRefInfo {
+    fn read_data_as_field_ref(
+        reader: &mut ByteReader,
+        constant_pool_index: u16,
+    ) -> ConstantFieldRefInfo {
         ConstantFieldRefInfo {
+            constant_pool_index,
             class_index: to_u16(&reader.read_n_bytes(2)),
             name_and_type_index: to_u16(&reader.read_n_bytes(2)),
         }
     }
 
     /// Read the data blob as a method reference constant pool entry
-    fn read_data_as_method_ref(reader: &mut ByteReader) -> ConstantMethodRefInfo {
+    fn read_data_as_method_ref(
+        reader: &mut ByteReader,
+        constant_pool_index: u16,
+    ) -> ConstantMethodRefInfo {
         ConstantMethodRefInfo {
+            constant_pool_index,
             class_index: to_u16(&reader.read_n_bytes(2)),
             name_and_type_index: to_u16(&reader.read_n_bytes(2)),
         }
@@ -314,62 +338,92 @@ impl ConstantPoolInfo {
     /// Read the data blob as an interface method reference constant pool entry
     fn read_data_as_interface_method_ref(
         reader: &mut ByteReader,
+        constant_pool_index: u16,
     ) -> ConstantInterfaceMethodRefInfo {
         ConstantInterfaceMethodRefInfo {
+            constant_pool_index,
             class_index: to_u16(&reader.read_n_bytes(2)),
             name_and_type_index: to_u16(&reader.read_n_bytes(2)),
         }
     }
 
     /// Read the data blob as a name and type constant pool entry
-    fn read_data_as_name_and_type(reader: &mut ByteReader) -> ConstantNameAndTypeInfo {
+    fn read_data_as_name_and_type(
+        reader: &mut ByteReader,
+        constant_pool_index: u16,
+    ) -> ConstantNameAndTypeInfo {
         ConstantNameAndTypeInfo {
+            constant_pool_index,
             name_index: to_u16(&reader.read_n_bytes(2)),
             descriptor_index: to_u16(&reader.read_n_bytes(2)),
         }
     }
 
     /// Read the data blob as a method handle constant pool entry
-    fn read_data_as_method_handle(reader: &mut ByteReader) -> ConstantMethodHandleInfo {
+    fn read_data_as_method_handle(
+        reader: &mut ByteReader,
+        constant_pool_index: u16,
+    ) -> ConstantMethodHandleInfo {
         ConstantMethodHandleInfo {
+            constant_pool_index,
             reference_kind: MethodHandleType::from_kind(&reader.read_n_bytes(1)[0]),
             reference_index: to_u16(&reader.read_n_bytes(2)),
         }
     }
 
     /// Read the data blob as a method type constant pool entry
-    fn read_data_as_method_type(reader: &mut ByteReader) -> ConstantMethodTypeInfo {
+    fn read_data_as_method_type(
+        reader: &mut ByteReader,
+        constant_pool_index: u16,
+    ) -> ConstantMethodTypeInfo {
         ConstantMethodTypeInfo {
+            constant_pool_index,
             descriptor_index: to_u16(&reader.read_n_bytes(2)),
         }
     }
 
     /// Read the data blob as a dynamic constant pool entry
-    fn read_data_as_dynamic(reader: &mut ByteReader) -> ConstantDynamicInfo {
+    fn read_data_as_dynamic(
+        reader: &mut ByteReader,
+        constant_pool_index: u16,
+    ) -> ConstantDynamicInfo {
         ConstantDynamicInfo {
+            constant_pool_index,
             bootstrap_method_attr_index: to_u16(&reader.read_n_bytes(2)),
             name_and_type_index: to_u16(&reader.read_n_bytes(2)),
         }
     }
 
     /// Read the data blob as an invoke dynamic constant pool entry
-    fn read_data_as_invoke_dynamic(reader: &mut ByteReader) -> ConstantInvokeDynamicInfo {
+    fn read_data_as_invoke_dynamic(
+        reader: &mut ByteReader,
+        constant_pool_index: u16,
+    ) -> ConstantInvokeDynamicInfo {
         ConstantInvokeDynamicInfo {
+            constant_pool_index,
             bootstrap_method_attr_index: to_u16(&reader.read_n_bytes(2)),
             name_and_type_index: to_u16(&reader.read_n_bytes(2)),
         }
     }
 
     /// Read the data blob as a module constant pool entry
-    fn read_data_as_module(reader: &mut ByteReader) -> ConstantModuleInfo {
+    fn read_data_as_module(
+        reader: &mut ByteReader,
+        constant_pool_index: u16,
+    ) -> ConstantModuleInfo {
         ConstantModuleInfo {
+            constant_pool_index,
             name_index: to_u16(&reader.read_n_bytes(2)),
         }
     }
 
     /// Read the data blob as a package constant pool entry
-    fn read_data_as_package(reader: &mut ByteReader) -> ConstantPackageInfo {
+    fn read_data_as_package(
+        reader: &mut ByteReader,
+        constant_pool_index: u16,
+    ) -> ConstantPackageInfo {
         ConstantPackageInfo {
+            constant_pool_index,
             name_index: to_u16(&reader.read_n_bytes(2)),
         }
     }
@@ -494,14 +548,9 @@ impl ConstantPoolInfo {
     }
 }
 
-/// Base trait to store specialised constant pool data entries
-pub trait ConstantPoolInfoData {
-    /// Cast to the concreate type that implements this trait
-    fn as_concrete_type(&self) -> &dyn Any;
-}
-
 /// Constant pool UTF-8 string
 pub struct ConstantUtf8Info {
+    pub constant_pool_index: u16,
     pub length: u16,
     pub string: String,
 }
@@ -514,6 +563,7 @@ impl ConstantPoolInfoData for ConstantUtf8Info {
 
 /// Constant pool integer
 pub struct ConstantIntegerInfo {
+    pub constant_pool_index: u16,
     pub value: i32,
 }
 
@@ -525,6 +575,7 @@ impl ConstantPoolInfoData for ConstantIntegerInfo {
 
 /// Constant pool float
 pub struct ConstantFloatInfo {
+    pub constant_pool_index: u16,
     pub value: f32,
 }
 
@@ -536,6 +587,7 @@ impl ConstantPoolInfoData for ConstantFloatInfo {
 
 /// Constant pool long
 pub struct ConstantLongInfo {
+    pub constant_pool_index: u16,
     pub value: i64,
 }
 
@@ -547,6 +599,7 @@ impl ConstantPoolInfoData for ConstantLongInfo {
 
 /// Constant pool double
 pub struct ConstantDoubleInfo {
+    pub constant_pool_index: u16,
     pub value: f64,
 }
 
@@ -557,7 +610,9 @@ impl ConstantPoolInfoData for ConstantDoubleInfo {
 }
 
 /// Constant pool class
+#[derive(Clone)]
 pub struct ConstantClassInfo {
+    pub constant_pool_index: u16,
     pub name_index: u16,
 }
 
@@ -569,6 +624,7 @@ impl ConstantPoolInfoData for ConstantClassInfo {
 
 /// Constant pool string
 pub struct ConstantStringInfo {
+    pub constant_pool_index: u16,
     pub string_index: u16,
 }
 
@@ -580,6 +636,7 @@ impl ConstantPoolInfoData for ConstantStringInfo {
 
 /// Constant pool field reference
 pub struct ConstantFieldRefInfo {
+    pub constant_pool_index: u16,
     pub class_index: u16,
     pub name_and_type_index: u16,
 }
@@ -592,6 +649,7 @@ impl ConstantPoolInfoData for ConstantFieldRefInfo {
 
 /// Constant pool method reference
 pub struct ConstantMethodRefInfo {
+    pub constant_pool_index: u16,
     pub class_index: u16,
     pub name_and_type_index: u16,
 }
@@ -604,6 +662,7 @@ impl ConstantPoolInfoData for ConstantMethodRefInfo {
 
 /// Constant pool interface method reference
 pub struct ConstantInterfaceMethodRefInfo {
+    pub constant_pool_index: u16,
     pub class_index: u16,
     pub name_and_type_index: u16,
 }
@@ -616,6 +675,7 @@ impl ConstantPoolInfoData for ConstantInterfaceMethodRefInfo {
 
 /// Constant pool name and type
 pub struct ConstantNameAndTypeInfo {
+    pub constant_pool_index: u16,
     pub name_index: u16,
     pub descriptor_index: u16,
 }
@@ -628,6 +688,7 @@ impl ConstantPoolInfoData for ConstantNameAndTypeInfo {
 
 /// Constant pool method handle
 pub struct ConstantMethodHandleInfo {
+    pub constant_pool_index: u16,
     pub reference_kind: MethodHandleType,
     pub reference_index: u16,
 }
@@ -640,6 +701,7 @@ impl ConstantPoolInfoData for ConstantMethodHandleInfo {
 
 /// Constant pool method type
 pub struct ConstantMethodTypeInfo {
+    pub constant_pool_index: u16,
     pub descriptor_index: u16,
 }
 
@@ -651,6 +713,7 @@ impl ConstantPoolInfoData for ConstantMethodTypeInfo {
 
 /// Constant pool dynamic
 pub struct ConstantDynamicInfo {
+    pub constant_pool_index: u16,
     pub bootstrap_method_attr_index: u16,
     pub name_and_type_index: u16,
 }
@@ -663,6 +726,7 @@ impl ConstantPoolInfoData for ConstantDynamicInfo {
 
 /// Constant pool invoke dynamic
 pub struct ConstantInvokeDynamicInfo {
+    pub constant_pool_index: u16,
     pub bootstrap_method_attr_index: u16,
     pub name_and_type_index: u16,
 }
@@ -675,6 +739,7 @@ impl ConstantPoolInfoData for ConstantInvokeDynamicInfo {
 
 /// Constant pool module
 pub struct ConstantModuleInfo {
+    pub constant_pool_index: u16,
     pub name_index: u16,
 }
 
@@ -686,6 +751,7 @@ impl ConstantPoolInfoData for ConstantModuleInfo {
 
 /// Constant pool package
 pub struct ConstantPackageInfo {
+    pub constant_pool_index: u16,
     pub name_index: u16,
 }
 

@@ -12,7 +12,7 @@ pub enum AccessFlags {
     /// Declared final; no subclasses allowed
     AccFinal,
 
-    /// Treat superclass methods specially when invoked by the *invokespecial* instruction
+    /// Treat superclass methods specially when invoked by the `invokespecial` instruction
     AccSuper,
 
     /// Is an interface, not a class

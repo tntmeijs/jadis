@@ -5,7 +5,7 @@
 
 use crate::access_flags::AccessFlags;
 use crate::byte_reader::ByteReader;
-use crate::constant_pool::{ConstantPoolInfo, Tag};
+use crate::constant_pool::{ConstantClassInfo, ConstantPoolInfo, Tag};
 use crate::utils::{to_u16, to_u32};
 
 const MAGIC_NUMBER: u32 = 0xCAFEBABE;
@@ -31,6 +31,12 @@ pub struct ClassFile {
 
     /// Class access and property modifiers
     pub access_flags: Vec<AccessFlags>,
+
+    /// Represents the class defined by this class file
+    pub this_class: ConstantClassInfo,
+
+    /// Represets the direct superclass of the class defined by this class file
+    pub super_class: Option<ConstantClassInfo>,
 }
 
 impl ClassFile {
@@ -42,6 +48,8 @@ impl ClassFile {
         let constant_pool_count = Self::read_u16(reader);
         let constant_pool = Self::read_constant_pool(reader, constant_pool_count);
         let access_flags = Self::read_access_flags(reader);
+        let this_class = Self::read_this_class(reader, &constant_pool);
+        let super_class = Self::read_super_class(reader, &constant_pool);
 
         Self {
             magic,
@@ -50,6 +58,8 @@ impl ClassFile {
             constant_pool_count,
             constant_pool,
             access_flags,
+            this_class,
+            super_class,
         }
     }
 
@@ -103,5 +113,37 @@ impl ClassFile {
     fn read_access_flags(reader: &mut ByteReader) -> Vec<AccessFlags> {
         let bitmask = to_u16(reader.read_n_bytes(2));
         AccessFlags::from_u16(bitmask)
+    }
+
+    /// Read information from the constant pool about the class represented by this class file
+    fn read_this_class(
+        reader: &mut ByteReader,
+        constant_pool: &Vec<ConstantPoolInfo>,
+    ) -> ConstantClassInfo {
+        // Subtract 1 to account for the 1-based indexing of a constant pool
+        let index = to_u16(reader.read_n_bytes(2)) - 1;
+
+        match constant_pool[usize::from(index)].try_cast_into_class() {
+            Some(class) => class.clone(),
+            None => panic!("Unable to fetch \"this class\" information from constant pool"),
+        }
+    }
+
+    /// Read information from the constant pool about the direct super class of the class represented by this class file
+    fn read_super_class(
+        reader: &mut ByteReader,
+        constant_pool: &Vec<ConstantPoolInfo>,
+    ) -> Option<ConstantClassInfo> {
+        let index = to_u16(reader.read_n_bytes(2));
+
+        if index == 0 {
+            return None;
+        }
+
+        // Subtract 1 to account for the 1-based indexing of a constant pool
+        match constant_pool[usize::from(index - 1)].try_cast_into_class() {
+            Some(class) => Some(class.clone()),
+            None => None,
+        }
     }
 }
