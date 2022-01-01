@@ -494,7 +494,7 @@ impl ConstantPoolInfo {
     }
 }
 
-/// Base trait to store specialized constant pool data entries
+/// Base trait to store specialised constant pool data entries
 pub trait ConstantPoolInfoData {
     /// Cast to the concreate type that implements this trait
     fn as_concrete_type(&self) -> &dyn Any;

@@ -68,6 +68,23 @@
 <span id="66">66</span>
 <span id="67">67</span>
 <span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
 </pre><pre class="rust">
 <span class="doccomment">//! Represents the JVM .class format</span>
 <span class="doccomment">//!</span>
@@ -75,7 +92,11 @@
 <span class="doccomment">//! Do note that the actual file IO is not handled by this module</span>
 
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::byte_reader::ByteReader</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::constant_pool::ConstantPoolInfo</span>;
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::constant_pool</span>::{<span class="ident">ConstantPoolInfo</span>, <span class="ident">Tag</span>};
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::utils</span>::{<span class="ident">to_u16</span>, <span class="ident">to_u32</span>};
+
+<span class="kw">const</span> <span class="ident">SIZE_BYTES_U16</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">2</span>;
+<span class="kw">const</span> <span class="ident">SIZE_BYTES_U32</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">4</span>;
 
 <span class="doccomment">/// JVM class file representation</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ClassFile</span> {
@@ -118,22 +139,35 @@
 
     <span class="doccomment">/// Read the magic number from a class file</span>
     <span class="kw">fn</span> <span class="ident">read_magic_number</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ByteReader</span>) {
-        <span class="self">self</span>.<span class="ident">magic</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">read_u32</span>()
+        <span class="self">self</span>.<span class="ident">magic</span> <span class="op">=</span> <span class="ident">to_u32</span>(<span class="ident">reader</span>.<span class="ident">read_n_bytes</span>(<span class="ident">SIZE_BYTES_U32</span>))
     }
 
     <span class="doccomment">/// Read the major and minor version from a class file</span>
     <span class="kw">fn</span> <span class="ident">read_version</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ByteReader</span>) {
-        <span class="self">self</span>.<span class="ident">minor_version</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">read_u16</span>();
-        <span class="self">self</span>.<span class="ident">major_version</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">read_u16</span>();
+        <span class="self">self</span>.<span class="ident">minor_version</span> <span class="op">=</span> <span class="ident">to_u16</span>(<span class="ident">reader</span>.<span class="ident">read_n_bytes</span>(<span class="ident">SIZE_BYTES_U16</span>));
+        <span class="self">self</span>.<span class="ident">major_version</span> <span class="op">=</span> <span class="ident">to_u16</span>(<span class="ident">reader</span>.<span class="ident">read_n_bytes</span>(<span class="ident">SIZE_BYTES_U16</span>));
     }
 
     <span class="doccomment">/// Read the entire constant pool</span>
     <span class="kw">fn</span> <span class="ident">read_constant_pool</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ByteReader</span>) {
-        <span class="self">self</span>.<span class="ident">constant_pool_count</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">read_u16</span>();
+        <span class="self">self</span>.<span class="ident">constant_pool_count</span> <span class="op">=</span> <span class="ident">to_u16</span>(<span class="ident">reader</span>.<span class="ident">read_n_bytes</span>(<span class="ident">SIZE_BYTES_U16</span>));
+
+        <span class="comment">// Index into the constant pool</span>
+        <span class="comment">// The constant pool starts indexing at one, which is why this index starts at one as well</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">index</span> <span class="op">=</span> <span class="number">1</span>;
 
         <span class="comment">// Read the entire constant pool</span>
-        <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..(<span class="self">self</span>.<span class="ident">constant_pool_count</span> <span class="op">-</span> <span class="number">1</span>) {
-            <span class="self">self</span>.<span class="ident">constant_pool</span>.<span class="ident">push</span>(<span class="ident">ConstantPoolInfo::new</span>(<span class="ident">reader</span>));
+        <span class="kw">while</span> <span class="ident">index</span> <span class="op">&lt;</span> (<span class="self">self</span>.<span class="ident">constant_pool_count</span>) {
+            <span class="kw">let</span> <span class="ident">info</span> <span class="op">=</span> <span class="ident">ConstantPoolInfo::new</span>(<span class="ident">reader</span>, <span class="ident">index</span>);
+
+            <span class="comment">// Long and double &quot;occupy&quot; two indices</span>
+            <span class="comment">// See: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.4.5</span>
+            <span class="ident">index</span> <span class="op">+</span><span class="op">=</span> <span class="kw">match</span> <span class="ident">info</span>.<span class="ident">tag</span> {
+                <span class="ident">Tag::ConstantLong</span> <span class="op">|</span> <span class="ident">Tag::ConstantDouble</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">2</span>,
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">1</span>,
+            };
+
+            <span class="self">self</span>.<span class="ident">constant_pool</span>.<span class="ident">push</span>(<span class="ident">info</span>);
         }
     }
 }

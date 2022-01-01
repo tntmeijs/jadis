@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["ClassFile","JVM class file representation"]]});
+initSidebarItems({"constant":[["SIZE_BYTES_U16",""],["SIZE_BYTES_U32",""]],"struct":[["ClassFile","JVM class file representation"]]});
