@@ -149,7 +149,7 @@ pub struct ConstantPoolInfo {
     pub tag: Tag,
 
     /// Data associated with this entity
-    pub data: Box<dyn ConstantPoolInfoData>,
+    data: Box<dyn ConstantPoolInfoData>,
 }
 
 impl ConstantPoolInfo {
