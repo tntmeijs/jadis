@@ -115,8 +115,9 @@ impl<'a> Disassembler<'a> {
             println!("Super class: NONE");
         }
 
-        println!("Constant pool count: {}", class.constant_pool_count);
-        println!("Constant pool contents:");
+        println!("Interfaces: {:?}", class.interfaces);
+
+        println!("Constant pool:");
 
         for entry in &class.constant_pool {
             match entry.tag {

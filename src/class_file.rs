@@ -23,9 +23,6 @@ pub struct ClassFile {
     /// Bytecode major version
     pub major_version: u16,
 
-    /// Number of items in the constant pool plus one
-    pub constant_pool_count: u16,
-
     /// Constant pool
     pub constant_pool: Vec<ConstantPoolInfo>,
 
@@ -37,6 +34,9 @@ pub struct ClassFile {
 
     /// Represets the direct superclass of the class defined by this class file
     pub super_class: Option<ConstantClassInfo>,
+
+    /// Represents all interfaces that are a direct superinterface of this class or interface type
+    pub interfaces: Vec<ConstantClassInfo>,
 }
 
 impl ClassFile {
@@ -45,21 +45,21 @@ impl ClassFile {
         let magic = Self::read_magic_number(reader);
         let minor_version = Self::read_u16(reader);
         let major_version = Self::read_u16(reader);
-        let constant_pool_count = Self::read_u16(reader);
-        let constant_pool = Self::read_constant_pool(reader, constant_pool_count);
+        let constant_pool = Self::read_constant_pool(reader);
         let access_flags = Self::read_access_flags(reader);
         let this_class = Self::read_this_class(reader, &constant_pool);
         let super_class = Self::read_super_class(reader, &constant_pool);
+        let interfaces = Self::read_interfaces(reader, &constant_pool);
 
         Self {
             magic,
             minor_version,
             major_version,
-            constant_pool_count,
             constant_pool,
             access_flags,
             this_class,
             super_class,
+            interfaces,
         }
     }
 
@@ -82,10 +82,8 @@ impl ClassFile {
     }
 
     /// Read the entire constant pool
-    fn read_constant_pool(
-        reader: &mut ByteReader,
-        constant_pool_count: u16,
-    ) -> Vec<ConstantPoolInfo> {
+    fn read_constant_pool(reader: &mut ByteReader) -> Vec<ConstantPoolInfo> {
+        let constant_pool_count = to_u16(reader.read_n_bytes(2));
         let mut constant_pool = vec![];
 
         // Index into the constant pool
@@ -145,5 +143,26 @@ impl ClassFile {
             Some(class) => Some(class.clone()),
             None => None,
         }
+    }
+
+    /// Read information about all direct superinterfaces of this class or interface type from the constant pool
+    fn read_interfaces(
+        reader: &mut ByteReader,
+        constant_pool: &Vec<ConstantPoolInfo>,
+    ) -> Vec<ConstantClassInfo> {
+        let interfaces_count = to_u16(reader.read_n_bytes(2));
+        let mut interfaces = vec![];
+
+        for _ in 0..interfaces_count {
+            let constant_pool_index = to_u16(reader.read_n_bytes(2));
+
+            // Subtract 1 to account for the 1-based indexing of a constant pool
+            match constant_pool[usize::from(constant_pool_index - 1)].try_cast_into_class() {
+                Some(class) => interfaces.push(class.clone()),
+                None => panic!("Unable to fetch a class entry from the constant pool, error at constant pool index {}", constant_pool_index)
+            };
+        }
+
+        interfaces
     }
 }

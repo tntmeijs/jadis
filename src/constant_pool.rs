@@ -610,7 +610,8 @@ impl ConstantPoolInfoData for ConstantDoubleInfo {
 }
 
 /// Constant pool class
-#[derive(Clone)]
+// TODO: remove debug directive
+#[derive(Debug, Clone)]
 pub struct ConstantClassInfo {
     pub constant_pool_index: u16,
     pub name_index: u16,
