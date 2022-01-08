@@ -3,9 +3,10 @@
 //! This module is used to add class format parsing functionality to Jadis
 //! Do note that the actual file IO is not handled by this module
 
-use crate::access_flags::AccessFlags;
+use crate::access_flags::ClassAccessFlags;
 use crate::byte_reader::ByteReader;
-use crate::constant_pool::{ConstantClassInfo, ConstantPoolInfo, Tag};
+use crate::constant_pool::{ConstantClassInfo, ConstantPoolContainer, ConstantPoolInfo, Tag};
+use crate::field::FieldInfo;
 use crate::utils::{to_u16, to_u32};
 
 const MAGIC_NUMBER: u32 = 0xCAFEBABE;
@@ -24,10 +25,10 @@ pub struct ClassFile {
     pub major_version: u16,
 
     /// Constant pool
-    pub constant_pool: Vec<ConstantPoolInfo>,
+    pub constant_pool: ConstantPoolContainer,
 
     /// Class access and property modifiers
-    pub access_flags: Vec<AccessFlags>,
+    pub access_flags: Vec<ClassAccessFlags>,
 
     /// Represents the class defined by this class file
     pub this_class: ConstantClassInfo,
@@ -37,6 +38,9 @@ pub struct ClassFile {
 
     /// Represents all interfaces that are a direct superinterface of this class or interface type
     pub interfaces: Vec<ConstantClassInfo>,
+
+    /// Represents all fields, both class variables and instance variables, declared by this class or interface type
+    pub fields: Vec<FieldInfo>,
 }
 
 impl ClassFile {
@@ -50,6 +54,7 @@ impl ClassFile {
         let this_class = Self::read_this_class(reader, &constant_pool);
         let super_class = Self::read_super_class(reader, &constant_pool);
         let interfaces = Self::read_interfaces(reader, &constant_pool);
+        let fields = Self::read_fields(reader, &constant_pool);
 
         Self {
             magic,
@@ -60,6 +65,7 @@ impl ClassFile {
             this_class,
             super_class,
             interfaces,
+            fields,
         }
     }
 
@@ -82,9 +88,9 @@ impl ClassFile {
     }
 
     /// Read the entire constant pool
-    fn read_constant_pool(reader: &mut ByteReader) -> Vec<ConstantPoolInfo> {
+    fn read_constant_pool(reader: &mut ByteReader) -> ConstantPoolContainer {
         let constant_pool_count = to_u16(reader.read_n_bytes(2));
-        let mut constant_pool = vec![];
+        let mut constant_pool = ConstantPoolContainer::new();
 
         // Index into the constant pool
         // The constant pool starts indexing at one, which is why this index starts at one as well
@@ -96,50 +102,65 @@ impl ClassFile {
 
             // Long and double "occupy" two indices
             // See: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.4.5
-            index += match info.tag {
+            let offset = match info.tag {
                 Tag::ConstantLong | Tag::ConstantDouble => 2,
                 _ => 1,
             };
 
-            constant_pool.push(info);
+            // First store the new entry with the current index
+            constant_pool.insert(index, info);
+
+            // Once the entry has been stored, the index can safely be updated to the next index
+            index += offset;
         }
 
         constant_pool
     }
 
     /// Read the class access and property modifiers
-    fn read_access_flags(reader: &mut ByteReader) -> Vec<AccessFlags> {
+    fn read_access_flags(reader: &mut ByteReader) -> Vec<ClassAccessFlags> {
         let bitmask = to_u16(reader.read_n_bytes(2));
-        AccessFlags::from_u16(bitmask)
+        ClassAccessFlags::from_u16(bitmask)
     }
 
     /// Read information from the constant pool about the class represented by this class file
     fn read_this_class(
         reader: &mut ByteReader,
-        constant_pool: &Vec<ConstantPoolInfo>,
+        constant_pool: &ConstantPoolContainer,
     ) -> ConstantClassInfo {
-        // Subtract 1 to account for the 1-based indexing of a constant pool
-        let index = to_u16(reader.read_n_bytes(2)) - 1;
+        let constant_pool_index = to_u16(reader.read_n_bytes(2));
 
-        match constant_pool[usize::from(index)].try_cast_into_class() {
+        let constant_pool_entry = constant_pool.get(&constant_pool_index).expect(&format!(
+            "Unable to fetch entry from constant pool at index {}",
+            constant_pool_index
+        ));
+
+        match constant_pool_entry.try_cast_into_class() {
             Some(class) => class.clone(),
-            None => panic!("Unable to fetch \"this class\" information from constant pool"),
+            None => panic!(
+                "Unable to fetch \"this class\" information from constant pool at index {}",
+                constant_pool_index
+            ),
         }
     }
 
     /// Read information from the constant pool about the direct super class of the class represented by this class file
     fn read_super_class(
         reader: &mut ByteReader,
-        constant_pool: &Vec<ConstantPoolInfo>,
+        constant_pool: &ConstantPoolContainer,
     ) -> Option<ConstantClassInfo> {
-        let index = to_u16(reader.read_n_bytes(2));
+        let constant_pool_index = to_u16(reader.read_n_bytes(2));
 
-        if index == 0 {
+        if constant_pool_index == 0 {
             return None;
         }
 
-        // Subtract 1 to account for the 1-based indexing of a constant pool
-        match constant_pool[usize::from(index - 1)].try_cast_into_class() {
+        let constant_pool_entry = constant_pool.get(&constant_pool_index).expect(&format!(
+            "Unable to fetch entry from constant pool at index {}",
+            constant_pool_index
+        ));
+
+        match constant_pool_entry.try_cast_into_class() {
             Some(class) => Some(class.clone()),
             None => None,
         }
@@ -148,7 +169,7 @@ impl ClassFile {
     /// Read information about all direct superinterfaces of this class or interface type from the constant pool
     fn read_interfaces(
         reader: &mut ByteReader,
-        constant_pool: &Vec<ConstantPoolInfo>,
+        constant_pool: &ConstantPoolContainer,
     ) -> Vec<ConstantClassInfo> {
         let interfaces_count = to_u16(reader.read_n_bytes(2));
         let mut interfaces = vec![];
@@ -156,13 +177,32 @@ impl ClassFile {
         for _ in 0..interfaces_count {
             let constant_pool_index = to_u16(reader.read_n_bytes(2));
 
-            // Subtract 1 to account for the 1-based indexing of a constant pool
-            match constant_pool[usize::from(constant_pool_index - 1)].try_cast_into_class() {
+            let constant_pool_entry = constant_pool.get(&constant_pool_index).expect(&format!(
+                "Unable to fetch entry from constant pool at index {}",
+                constant_pool_index
+            ));
+
+            match constant_pool_entry.try_cast_into_class() {
                 Some(class) => interfaces.push(class.clone()),
                 None => panic!("Unable to fetch a class entry from the constant pool, error at constant pool index {}", constant_pool_index)
             };
         }
 
         interfaces
+    }
+
+    /// Read information about the fields in this class or interface represented by this class file
+    fn read_fields(
+        reader: &mut ByteReader,
+        constant_pool: &ConstantPoolContainer,
+    ) -> Vec<FieldInfo> {
+        let fields_count = to_u16(reader.read_n_bytes(2));
+        let mut fields = vec![];
+
+        for _ in 0..fields_count {
+            fields.push(FieldInfo::new(reader, constant_pool));
+        }
+
+        fields
     }
 }

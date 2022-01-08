@@ -119,7 +119,7 @@ impl<'a> Disassembler<'a> {
 
         println!("Constant pool:");
 
-        for entry in &class.constant_pool {
+        for entry in class.constant_pool.values() {
             match entry.tag {
                 crate::constant_pool::Tag::ConstantUtf8 => {
                     let concrete = entry.try_cast_into_utf8().unwrap();
@@ -196,6 +196,24 @@ impl<'a> Disassembler<'a> {
 
         for flag in &class.access_flags {
             println!("\t- {:?}", flag);
+        }
+
+        println!("Fields:");
+
+        for field in &class.fields {
+            let constant_pool_entry = class.constant_pool.get(&field.name_index).expect(&format!(
+                "Unable to fetch field name from constant pool at index {}",
+                field.name_index
+            ));
+
+            println!(
+                "\t- {}",
+                constant_pool_entry
+                    .try_cast_into_utf8()
+                    .expect("Unable to cast into UTF-8 constant pool entry")
+                    .string
+                    .as_str()
+            );
         }
 
         Self { config, class }

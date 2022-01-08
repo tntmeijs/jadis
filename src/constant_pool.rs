@@ -2,12 +2,15 @@
 //!
 //! This module contains all information necessary to parse constant pool entities from class files
 
-use std::{any::Any, panic};
+use std::{any::Any, collections::BTreeMap, panic};
 
 use crate::{
     byte_reader::ByteReader,
     utils::{to_f32, to_f64, to_i32, to_i64, to_u16},
 };
+
+/// Constant pool container type
+pub type ConstantPoolContainer = BTreeMap<u16, ConstantPoolInfo>;
 
 /// Base trait to store specialised constant pool data entries
 trait ConstantPoolInfoData {
@@ -16,6 +19,8 @@ trait ConstantPoolInfoData {
 }
 
 /// Constant pool tags
+// TODO: remove debug directive
+#[derive(Debug)]
 pub enum Tag {
     /// UTF-8 string
     ConstantUtf8,
@@ -168,72 +173,58 @@ impl ConstantPoolInfo {
             },
             Tag::ConstantFloat => Self {
                 tag: Tag::ConstantFloat,
-
                 data: Box::new(Self::read_data_as_float(reader, index)),
             },
             Tag::ConstantLong => Self {
                 tag: Tag::ConstantLong,
-
                 data: Box::new(Self::read_data_as_long(reader, index)),
             },
             Tag::ConstantDouble => Self {
                 tag: Tag::ConstantDouble,
-
                 data: Box::new(Self::read_data_as_double(reader, index)),
             },
             Tag::ConstantClass => Self {
                 tag: Tag::ConstantClass,
-
                 data: Box::new(Self::read_data_as_class(reader, index)),
             },
             Tag::ConstantString => Self {
                 tag: Tag::ConstantString,
-
                 data: Box::new(Self::read_data_as_string(reader, index)),
             },
             Tag::ConstantFieldRef => Self {
                 tag: Tag::ConstantFieldRef,
-
                 data: Box::new(Self::read_data_as_field_ref(reader, index)),
             },
             Tag::ConstantMethodRef => Self {
                 tag: Tag::ConstantMethodRef,
-
                 data: Box::new(Self::read_data_as_method_ref(reader, index)),
             },
             Tag::ConstantInterfaceMethodRef => Self {
                 tag: Tag::ConstantInterfaceMethodRef,
-
                 data: Box::new(Self::read_data_as_interface_method_ref(reader, index)),
             },
             Tag::ConstantNameAndType => Self {
                 tag: Tag::ConstantNameAndType,
-
                 data: Box::new(Self::read_data_as_name_and_type(reader, index)),
             },
             Tag::ConstantMethodHandle => Self {
                 tag: Tag::ConstantMethodHandle,
-
                 data: Box::new(Self::read_data_as_method_handle(reader, index)),
             },
             Tag::ConstantMethodType => Self {
                 tag: Tag::ConstantMethodType,
-
                 data: Box::new(Self::read_data_as_method_type(reader, index)),
             },
             Tag::ConstantDynamic => Self {
                 tag: Tag::ConstantDynamic,
-
                 data: Box::new(Self::read_data_as_dynamic(reader, index)),
             },
             Tag::ConstantInvokeDynamic => Self {
                 tag: Tag::ConstantInvokeDynamic,
-
                 data: Box::new(Self::read_data_as_invoke_dynamic(reader, index)),
             },
             Tag::ConstantModule => Self {
                 tag: Tag::ConstantModule,
-
                 data: Box::new(Self::read_data_as_module(reader, index)),
             },
             Tag::ConstantPackage => Self {

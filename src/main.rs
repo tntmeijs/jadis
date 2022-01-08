@@ -32,10 +32,12 @@
 //! | -v, --verbose | Print additional information |
 
 mod access_flags;
+mod attribute;
 mod byte_reader;
 mod class_file;
 mod constant_pool;
 mod disassembler;
+mod field;
 mod utils;
 
 use byte_reader::ByteReader;
