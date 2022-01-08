@@ -234,6 +234,12 @@ impl<'a> Disassembler<'a> {
             );
         }
 
+        println!("Attributes:");
+
+        for attribute in &class.attributes {
+            println!("\t- {:?}", attribute.attribute_type);
+        }
+
         Self { config, class }
     }
 }

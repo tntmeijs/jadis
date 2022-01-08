@@ -4,6 +4,7 @@
 //! Do note that the actual file IO is not handled by this module
 
 use crate::access_flags::ClassAccessFlags;
+use crate::attribute::AttributeInfo;
 use crate::byte_reader::ByteReader;
 use crate::constant_pool::{ConstantClassInfo, ConstantPoolContainer, ConstantPoolInfo, Tag};
 use crate::field::FieldInfo;
@@ -45,6 +46,9 @@ pub struct ClassFile {
 
     /// Represents all methods
     pub methods: Vec<MethodInfo>,
+
+    /// Represents all class attributes
+    pub attributes: Vec<AttributeInfo>,
 }
 
 impl ClassFile {
@@ -60,6 +64,7 @@ impl ClassFile {
         let interfaces = Self::read_interfaces(reader, &constant_pool);
         let fields = Self::read_fields(reader, &constant_pool);
         let methods = Self::read_methods(reader, &constant_pool);
+        let attributes = Self::read_attributes(reader, &constant_pool);
 
         Self {
             magic,
@@ -72,6 +77,7 @@ impl ClassFile {
             interfaces,
             fields,
             methods,
+            attributes,
         }
     }
 
@@ -225,5 +231,20 @@ impl ClassFile {
         }
 
         methods
+    }
+
+    /// Read information about the class attributes
+    fn read_attributes(
+        reader: &mut ByteReader,
+        constant_pool: &ConstantPoolContainer,
+    ) -> Vec<AttributeInfo> {
+        let attributes_count = to_u16(reader.read_n_bytes(2));
+        let mut attributes = vec![];
+
+        for _ in 0..attributes_count {
+            attributes.push(AttributeInfo::new(reader, constant_pool));
+        }
+
+        attributes
     }
 }

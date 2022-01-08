@@ -12,6 +12,9 @@ trait Attribute {
     fn as_concrete_type(&self) -> &dyn Any;
 }
 
+/// Attribute types
+// TODO: remove debug directive
+#[derive(Debug)]
 pub enum AttributeType {
     /// See [§4.7.2](https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.2)
     ConstantValue,
