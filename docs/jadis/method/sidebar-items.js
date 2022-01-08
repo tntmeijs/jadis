@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["MethodInfo","Represents a method on a class or interface"]]});

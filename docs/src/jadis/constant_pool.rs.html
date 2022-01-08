@@ -754,25 +754,20 @@
 <span id="752">752</span>
 <span id="753">753</span>
 <span id="754">754</span>
-<span id="755">755</span>
-<span id="756">756</span>
-<span id="757">757</span>
-<span id="758">758</span>
-<span id="759">759</span>
-<span id="760">760</span>
-<span id="761">761</span>
-<span id="762">762</span>
 </pre><pre class="rust">
 <span class="doccomment">//! Represents an entity in the constant pool section of a class file</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! This module contains all information necessary to parse constant pool entities from class files</span>
 
-<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">any::Any</span>, <span class="ident">panic</span>};
+<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">any::Any</span>, <span class="ident">collections::BTreeMap</span>, <span class="ident">panic</span>};
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">byte_reader::ByteReader</span>,
     <span class="ident">utils</span>::{<span class="ident">to_f32</span>, <span class="ident">to_f64</span>, <span class="ident">to_i32</span>, <span class="ident">to_i64</span>, <span class="ident">to_u16</span>},
 };
+
+<span class="doccomment">/// Constant pool container type</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ConstantPoolContainer</span> <span class="op">=</span> <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u16</span>, <span class="ident">ConstantPoolInfo</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// Base trait to store specialised constant pool data entries</span>
 <span class="kw">trait</span> <span class="ident">ConstantPoolInfoData</span> {
@@ -781,6 +776,8 @@
 }
 
 <span class="doccomment">/// Constant pool tags</span>
+<span class="comment">// TODO: remove debug directive</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Tag</span> {
     <span class="doccomment">/// UTF-8 string</span>
     <span class="ident">ConstantUtf8</span>,
@@ -914,7 +911,7 @@
     <span class="kw">pub</span> <span class="ident">tag</span>: <span class="ident">Tag</span>,
 
     <span class="doccomment">/// Data associated with this entity</span>
-    <span class="kw">pub</span> <span class="ident">data</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">ConstantPoolInfoData</span><span class="op">&gt;</span>,
+    <span class="ident">data</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">ConstantPoolInfoData</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">ConstantPoolInfo</span> {
@@ -933,72 +930,58 @@
             },
             <span class="ident">Tag::ConstantFloat</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">tag</span>: <span class="ident">Tag::ConstantFloat</span>,
-
                 <span class="ident">data</span>: <span class="ident">Box::new</span>(<span class="self">Self</span><span class="ident">::read_data_as_float</span>(<span class="ident">reader</span>, <span class="ident">index</span>)),
             },
             <span class="ident">Tag::ConstantLong</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">tag</span>: <span class="ident">Tag::ConstantLong</span>,
-
                 <span class="ident">data</span>: <span class="ident">Box::new</span>(<span class="self">Self</span><span class="ident">::read_data_as_long</span>(<span class="ident">reader</span>, <span class="ident">index</span>)),
             },
             <span class="ident">Tag::ConstantDouble</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">tag</span>: <span class="ident">Tag::ConstantDouble</span>,
-
                 <span class="ident">data</span>: <span class="ident">Box::new</span>(<span class="self">Self</span><span class="ident">::read_data_as_double</span>(<span class="ident">reader</span>, <span class="ident">index</span>)),
             },
             <span class="ident">Tag::ConstantClass</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">tag</span>: <span class="ident">Tag::ConstantClass</span>,
-
                 <span class="ident">data</span>: <span class="ident">Box::new</span>(<span class="self">Self</span><span class="ident">::read_data_as_class</span>(<span class="ident">reader</span>, <span class="ident">index</span>)),
             },
             <span class="ident">Tag::ConstantString</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">tag</span>: <span class="ident">Tag::ConstantString</span>,
-
                 <span class="ident">data</span>: <span class="ident">Box::new</span>(<span class="self">Self</span><span class="ident">::read_data_as_string</span>(<span class="ident">reader</span>, <span class="ident">index</span>)),
             },
             <span class="ident">Tag::ConstantFieldRef</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">tag</span>: <span class="ident">Tag::ConstantFieldRef</span>,
-
                 <span class="ident">data</span>: <span class="ident">Box::new</span>(<span class="self">Self</span><span class="ident">::read_data_as_field_ref</span>(<span class="ident">reader</span>, <span class="ident">index</span>)),
             },
             <span class="ident">Tag::ConstantMethodRef</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">tag</span>: <span class="ident">Tag::ConstantMethodRef</span>,
-
                 <span class="ident">data</span>: <span class="ident">Box::new</span>(<span class="self">Self</span><span class="ident">::read_data_as_method_ref</span>(<span class="ident">reader</span>, <span class="ident">index</span>)),
             },
             <span class="ident">Tag::ConstantInterfaceMethodRef</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">tag</span>: <span class="ident">Tag::ConstantInterfaceMethodRef</span>,
-
                 <span class="ident">data</span>: <span class="ident">Box::new</span>(<span class="self">Self</span><span class="ident">::read_data_as_interface_method_ref</span>(<span class="ident">reader</span>, <span class="ident">index</span>)),
             },
             <span class="ident">Tag::ConstantNameAndType</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">tag</span>: <span class="ident">Tag::ConstantNameAndType</span>,
-
                 <span class="ident">data</span>: <span class="ident">Box::new</span>(<span class="self">Self</span><span class="ident">::read_data_as_name_and_type</span>(<span class="ident">reader</span>, <span class="ident">index</span>)),
             },
             <span class="ident">Tag::ConstantMethodHandle</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">tag</span>: <span class="ident">Tag::ConstantMethodHandle</span>,
-
                 <span class="ident">data</span>: <span class="ident">Box::new</span>(<span class="self">Self</span><span class="ident">::read_data_as_method_handle</span>(<span class="ident">reader</span>, <span class="ident">index</span>)),
             },
             <span class="ident">Tag::ConstantMethodType</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">tag</span>: <span class="ident">Tag::ConstantMethodType</span>,
-
                 <span class="ident">data</span>: <span class="ident">Box::new</span>(<span class="self">Self</span><span class="ident">::read_data_as_method_type</span>(<span class="ident">reader</span>, <span class="ident">index</span>)),
             },
             <span class="ident">Tag::ConstantDynamic</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">tag</span>: <span class="ident">Tag::ConstantDynamic</span>,
-
                 <span class="ident">data</span>: <span class="ident">Box::new</span>(<span class="self">Self</span><span class="ident">::read_data_as_dynamic</span>(<span class="ident">reader</span>, <span class="ident">index</span>)),
             },
             <span class="ident">Tag::ConstantInvokeDynamic</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">tag</span>: <span class="ident">Tag::ConstantInvokeDynamic</span>,
-
                 <span class="ident">data</span>: <span class="ident">Box::new</span>(<span class="self">Self</span><span class="ident">::read_data_as_invoke_dynamic</span>(<span class="ident">reader</span>, <span class="ident">index</span>)),
             },
             <span class="ident">Tag::ConstantModule</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">tag</span>: <span class="ident">Tag::ConstantModule</span>,
-
                 <span class="ident">data</span>: <span class="ident">Box::new</span>(<span class="self">Self</span><span class="ident">::read_data_as_module</span>(<span class="ident">reader</span>, <span class="ident">index</span>)),
             },
             <span class="ident">Tag::ConstantPackage</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span> {
@@ -1375,7 +1358,8 @@
 }
 
 <span class="doccomment">/// Constant pool class</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="comment">// TODO: remove debug directive</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ConstantClassInfo</span> {
     <span class="kw">pub</span> <span class="ident">constant_pool_index</span>: <span class="ident">u16</span>,
     <span class="kw">pub</span> <span class="ident">name_index</span>: <span class="ident">u16</span>,

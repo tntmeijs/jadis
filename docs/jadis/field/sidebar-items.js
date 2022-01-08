@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["FieldInfo","Represents a field on a class or interface"]]});

@@ -205,6 +205,9 @@
 <span id="203">203</span>
 <span id="204">204</span>
 <span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
 </pre><pre class="rust">
 <span class="doccomment">//! # Introduction</span>
 <span class="doccomment">//! The Jadis crate is a Java Virtual Machine language disassembler written in Rust.</span>
@@ -240,10 +243,13 @@
 <span class="doccomment">//! | -v, --verbose | Print additional information |</span>
 
 <span class="kw">mod</span> <span class="ident">access_flags</span>;
+<span class="kw">mod</span> <span class="ident">attribute</span>;
 <span class="kw">mod</span> <span class="ident">byte_reader</span>;
 <span class="kw">mod</span> <span class="ident">class_file</span>;
 <span class="kw">mod</span> <span class="ident">constant_pool</span>;
 <span class="kw">mod</span> <span class="ident">disassembler</span>;
+<span class="kw">mod</span> <span class="ident">field</span>;
+<span class="kw">mod</span> <span class="ident">method</span>;
 <span class="kw">mod</span> <span class="ident">utils</span>;
 
 <span class="kw">use</span> <span class="ident">byte_reader::ByteReader</span>;
