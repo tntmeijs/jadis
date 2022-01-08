@@ -1,3 +1,7 @@
+//! Provides functionality to simplify working with attribute structures
+//!
+//! Reference: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7
+
 use std::any::Any;
 
 use crate::{
