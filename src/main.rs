@@ -38,6 +38,7 @@ mod class_file;
 mod constant_pool;
 mod disassembler;
 mod field;
+mod method;
 mod utils;
 
 use byte_reader::ByteReader;

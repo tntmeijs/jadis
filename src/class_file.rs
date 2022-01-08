@@ -7,6 +7,7 @@ use crate::access_flags::ClassAccessFlags;
 use crate::byte_reader::ByteReader;
 use crate::constant_pool::{ConstantClassInfo, ConstantPoolContainer, ConstantPoolInfo, Tag};
 use crate::field::FieldInfo;
+use crate::method::MethodInfo;
 use crate::utils::{to_u16, to_u32};
 
 const MAGIC_NUMBER: u32 = 0xCAFEBABE;
@@ -41,6 +42,9 @@ pub struct ClassFile {
 
     /// Represents all fields, both class variables and instance variables, declared by this class or interface type
     pub fields: Vec<FieldInfo>,
+
+    /// Represents all methods
+    pub methods: Vec<MethodInfo>,
 }
 
 impl ClassFile {
@@ -55,6 +59,7 @@ impl ClassFile {
         let super_class = Self::read_super_class(reader, &constant_pool);
         let interfaces = Self::read_interfaces(reader, &constant_pool);
         let fields = Self::read_fields(reader, &constant_pool);
+        let methods = Self::read_methods(reader, &constant_pool);
 
         Self {
             magic,
@@ -66,6 +71,7 @@ impl ClassFile {
             super_class,
             interfaces,
             fields,
+            methods,
         }
     }
 
@@ -204,5 +210,20 @@ impl ClassFile {
         }
 
         fields
+    }
+
+    /// Read information about the methods
+    fn read_methods(
+        reader: &mut ByteReader,
+        constant_pool: &ConstantPoolContainer,
+    ) -> Vec<MethodInfo> {
+        let methods_count = to_u16(reader.read_n_bytes(2));
+        let mut methods = vec![];
+
+        for _ in 0..methods_count {
+            methods.push(MethodInfo::new(reader, constant_pool));
+        }
+
+        methods
     }
 }

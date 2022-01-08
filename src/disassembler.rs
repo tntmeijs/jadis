@@ -216,6 +216,24 @@ impl<'a> Disassembler<'a> {
             );
         }
 
+        println!("Methods:");
+
+        for method in &class.methods {
+            let constant_pool_entry = class.constant_pool.get(&method.name_index).expect(&format!(
+                "Unable to fetch method name from constant pool at index {}",
+                method.name_index
+            ));
+
+            println!(
+                "\t- {}",
+                constant_pool_entry
+                    .try_cast_into_utf8()
+                    .expect("Unable to cast into UTF-8 constant pool entry")
+                    .string
+                    .as_str()
+            );
+        }
+
         Self { config, class }
     }
 }
