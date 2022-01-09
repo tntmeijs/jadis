@@ -24,16 +24,21 @@ impl ByteReader {
     }
 
     /// Read N bytes from the current position in the binary blob
-    pub fn read_n_bytes(&mut self, n: usize) -> &[u8] {
+    pub fn read_n_bytes(&mut self, n: usize) -> Vec<u8> {
         let from = self.position;
         let to = self.position + n;
         self.position += n;
 
         let data = match self.data.get(from..to) {
-            Some(data) => data,
+            Some(data) => data.to_vec(),
             None => panic!("Unable to read {} bytes from the binary blob", n),
         };
 
         data
+    }
+
+    /// Skip the next N bytes relative to the current position in the binary blob
+    pub fn skip_n_bytes(&mut self, n: usize) {
+        self.position += n;
     }
 }

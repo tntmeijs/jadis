@@ -236,7 +236,7 @@ impl ConstantPoolInfo {
 
     /// Read the data blob as an UTF-8 constant pool entry
     fn read_data_as_utf8(reader: &mut ByteReader, constant_pool_index: u16) -> ConstantUtf8Info {
-        let length = to_u16(reader.read_n_bytes(2));
+        let length = to_u16(&reader.read_n_bytes(2));
 
         ConstantUtf8Info {
             constant_pool_index,

@@ -83,7 +83,7 @@ impl ClassFile {
 
     /// Read the magic number (always 0xCAFEBABE)
     fn read_magic_number(reader: &mut ByteReader) -> u32 {
-        let magic_number = to_u32(reader.read_n_bytes(SIZE_BYTES_U32));
+        let magic_number = to_u32(&reader.read_n_bytes(SIZE_BYTES_U32));
 
         assert_eq!(
             magic_number, MAGIC_NUMBER,
@@ -96,12 +96,12 @@ impl ClassFile {
 
     /// Read a number (u16) from a binary blob
     fn read_u16(reader: &mut ByteReader) -> u16 {
-        to_u16(reader.read_n_bytes(SIZE_BYTES_U16))
+        to_u16(&reader.read_n_bytes(SIZE_BYTES_U16))
     }
 
     /// Read the entire constant pool
     fn read_constant_pool(reader: &mut ByteReader) -> ConstantPoolContainer {
-        let constant_pool_count = to_u16(reader.read_n_bytes(2));
+        let constant_pool_count = to_u16(&reader.read_n_bytes(2));
         let mut constant_pool = ConstantPoolContainer::new();
 
         // Index into the constant pool
@@ -131,7 +131,7 @@ impl ClassFile {
 
     /// Read the class access and property modifiers
     fn read_access_flags(reader: &mut ByteReader) -> Vec<ClassAccessFlags> {
-        let bitmask = to_u16(reader.read_n_bytes(2));
+        let bitmask = to_u16(&reader.read_n_bytes(2));
         ClassAccessFlags::from_u16(bitmask)
     }
 
@@ -140,7 +140,7 @@ impl ClassFile {
         reader: &mut ByteReader,
         constant_pool: &ConstantPoolContainer,
     ) -> ConstantClassInfo {
-        let constant_pool_index = to_u16(reader.read_n_bytes(2));
+        let constant_pool_index = to_u16(&reader.read_n_bytes(2));
 
         let constant_pool_entry = constant_pool.get(&constant_pool_index).expect(&format!(
             "Unable to fetch entry from constant pool at index {}",
@@ -161,7 +161,7 @@ impl ClassFile {
         reader: &mut ByteReader,
         constant_pool: &ConstantPoolContainer,
     ) -> Option<ConstantClassInfo> {
-        let constant_pool_index = to_u16(reader.read_n_bytes(2));
+        let constant_pool_index = to_u16(&reader.read_n_bytes(2));
 
         if constant_pool_index == 0 {
             return None;
@@ -183,11 +183,11 @@ impl ClassFile {
         reader: &mut ByteReader,
         constant_pool: &ConstantPoolContainer,
     ) -> Vec<ConstantClassInfo> {
-        let interfaces_count = to_u16(reader.read_n_bytes(2));
+        let interfaces_count = to_u16(&reader.read_n_bytes(2));
         let mut interfaces = vec![];
 
         for _ in 0..interfaces_count {
-            let constant_pool_index = to_u16(reader.read_n_bytes(2));
+            let constant_pool_index = to_u16(&reader.read_n_bytes(2));
 
             let constant_pool_entry = constant_pool.get(&constant_pool_index).expect(&format!(
                 "Unable to fetch entry from constant pool at index {}",
@@ -208,7 +208,7 @@ impl ClassFile {
         reader: &mut ByteReader,
         constant_pool: &ConstantPoolContainer,
     ) -> Vec<FieldInfo> {
-        let fields_count = to_u16(reader.read_n_bytes(2));
+        let fields_count = to_u16(&reader.read_n_bytes(2));
         let mut fields = vec![];
 
         for _ in 0..fields_count {
@@ -223,7 +223,7 @@ impl ClassFile {
         reader: &mut ByteReader,
         constant_pool: &ConstantPoolContainer,
     ) -> Vec<MethodInfo> {
-        let methods_count = to_u16(reader.read_n_bytes(2));
+        let methods_count = to_u16(&reader.read_n_bytes(2));
         let mut methods = vec![];
 
         for _ in 0..methods_count {
@@ -238,7 +238,7 @@ impl ClassFile {
         reader: &mut ByteReader,
         constant_pool: &ConstantPoolContainer,
     ) -> Vec<AttributeInfo> {
-        let attributes_count = to_u16(reader.read_n_bytes(2));
+        let attributes_count = to_u16(&reader.read_n_bytes(2));
         let mut attributes = vec![];
 
         for _ in 0..attributes_count {

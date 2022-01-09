@@ -19,8 +19,8 @@ impl FieldInfo {
     /// Create a new field from a class file binary blob
     pub fn new(reader: &mut ByteReader, constant_pool: &ConstantPoolContainer) -> Self {
         let access_flags = Self::read_access_flags(reader);
-        let name_index = to_u16(reader.read_n_bytes(2));
-        let descriptor_index = to_u16(reader.read_n_bytes(2));
+        let name_index = to_u16(&reader.read_n_bytes(2));
+        let descriptor_index = to_u16(&reader.read_n_bytes(2));
         let attributes = Self::read_attributes(reader, constant_pool);
 
         Self {
@@ -33,7 +33,7 @@ impl FieldInfo {
 
     /// Read field access flags
     fn read_access_flags(reader: &mut ByteReader) -> Vec<FieldAccessFlags> {
-        let bitmask = to_u16(reader.read_n_bytes(2));
+        let bitmask = to_u16(&reader.read_n_bytes(2));
         FieldAccessFlags::from_u16(bitmask)
     }
 
@@ -42,7 +42,7 @@ impl FieldInfo {
         reader: &mut ByteReader,
         constant_pool: &ConstantPoolContainer,
     ) -> Vec<AttributeInfo> {
-        let attributes_count = to_u16(reader.read_n_bytes(2));
+        let attributes_count = to_u16(&reader.read_n_bytes(2));
         let mut attributes = vec![];
 
         for _ in 0..attributes_count {

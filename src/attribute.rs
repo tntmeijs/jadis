@@ -123,8 +123,8 @@ pub struct AttributeInfo {
 impl AttributeInfo {
     /// Create a new attribute from a class file binary blob
     pub fn new(reader: &mut ByteReader, constant_pool: &ConstantPoolContainer) -> Self {
-        let attribute_name_index = to_u16(reader.read_n_bytes(2));
-        let attribute_length = to_u32(reader.read_n_bytes(4));
+        let attribute_name_index = to_u16(&reader.read_n_bytes(2));
+        let attribute_length = to_u32(&reader.read_n_bytes(4));
         let name = constant_pool
             .get(&attribute_name_index)
             .expect(&format!(
@@ -157,6 +157,7 @@ impl AttributeInfo {
                         reader,
                         attribute_name_index,
                         attribute_length,
+                        constant_pool,
                     )),
                 }
             }
@@ -483,7 +484,7 @@ impl AttributeInfo {
             "Constant value attributes should have a length of 2"
         );
 
-        let constantvalue_index = to_u16(reader.read_n_bytes(2));
+        let constantvalue_index = to_u16(&reader.read_n_bytes(2));
 
         AttributeConstantValue {
             attribute_name_index,
@@ -497,11 +498,46 @@ impl AttributeInfo {
         reader: &mut ByteReader,
         attribute_name_index: u16,
         attribute_length: u32,
+        constant_pool: &ConstantPoolContainer,
     ) -> AttributeCode {
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.3
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeCode {}
+        let max_stack = to_u16(&reader.read_n_bytes(2));
+        let max_locals = to_u16(&reader.read_n_bytes(2));
+        let code_length = to_u32(&reader.read_n_bytes(4));
+
+        let code = reader.read_n_bytes(code_length as usize);
+        let exception_table_length = to_u16(&reader.read_n_bytes(2));
+
+        let mut exception_table = vec![];
+        for _ in 0..exception_table_length {
+            let start_pc = to_u16(&reader.read_n_bytes(2));
+            let end_pc = to_u16(&reader.read_n_bytes(2));
+            let handler_pc = to_u16(&reader.read_n_bytes(2));
+            let catch_type = to_u16(&reader.read_n_bytes(2));
+
+            exception_table.push(ExceptionTableEntry {
+                start_pc,
+                end_pc,
+                handler_pc,
+                catch_type,
+            });
+        }
+
+        let attributes_count = to_u16(&reader.read_n_bytes(2));
+
+        let mut attributes = vec![];
+        for _ in 0..attributes_count {
+            attributes.push(AttributeInfo::new(reader, constant_pool));
+        }
+
+        AttributeCode {
+            attribute_name_index,
+            attribute_length,
+            max_stack,
+            max_locals,
+            code: code.to_vec(),
+            exception_table,
+            attributes,
+        }
     }
 
     /// Read the data blob as a stack map table attribute
@@ -844,8 +880,13 @@ impl AttributeInfo {
 /// Represents the value of a constant expression
 /// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.2
 pub struct AttributeConstantValue {
+    /// Index into the constant pool that stores the attribute's name
     attribute_name_index: u16,
+
+    /// Length of the attribute (must equal two)
     attribute_length: u32,
+
+    /// Index into the constant pool which gives the value represented by this attribute
     constantvalue_index: u16,
 }
 
@@ -855,7 +896,47 @@ impl Attribute for AttributeConstantValue {
     }
 }
 
-pub struct AttributeCode {}
+/// Describes an exception handler in the code array
+struct ExceptionTableEntry {
+    /// Start of the range in the code array at which the exception handler is active
+    start_pc: u16,
+
+    /// End of the range in the code array at which the exception handler is active
+    end_pc: u16,
+
+    /// Indicates the start of the exception handler
+    handler_pc: u16,
+
+    /// The entry in the constant pool at this index represents a class of exceptions that this exception handler is designated
+    /// to catch
+    catch_type: u16,
+}
+
+/// A code attribute contains the Java Virtual Machine instructions and auxilary information for a method, including an instance
+/// initialization method and a class or interface initialization method
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.3
+pub struct AttributeCode {
+    /// Index into the constant pool that stores the attribute's name
+    attribute_name_index: u16,
+
+    /// Indicates the length of the attribute (excluding the initial six bytes)
+    attribute_length: u32,
+
+    /// Maximum depth of the operand stack of this method
+    max_stack: u16,
+
+    /// Maximum number of local variables in the local variable array allocated upon invocation of this method
+    max_locals: u16,
+
+    /// Java Virtual Machine code that implements this method
+    code: Vec<u8>,
+
+    /// Described exceptions handles in the code array
+    exception_table: Vec<ExceptionTableEntry>,
+
+    /// Attributes associated with this code attribute
+    attributes: Vec<AttributeInfo>,
+}
 
 impl Attribute for AttributeCode {
     fn as_concrete_type(&self) -> &dyn Any {
