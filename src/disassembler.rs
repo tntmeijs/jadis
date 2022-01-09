@@ -214,6 +214,15 @@ impl<'a> Disassembler<'a> {
                     .string
                     .as_str()
             );
+
+            println!(
+                "\t  Attributes: {:?}",
+                field
+                    .attributes
+                    .iter()
+                    .map(|x| &x.attribute_type)
+                    .collect::<Vec<_>>()
+            );
         }
 
         println!("Methods:");
@@ -232,13 +241,25 @@ impl<'a> Disassembler<'a> {
                     .string
                     .as_str()
             );
+
+            println!(
+                "\t  Attributes: {:?}",
+                method
+                    .attributes
+                    .iter()
+                    .map(|x| &x.attribute_type)
+                    .collect::<Vec<_>>()
+            );
         }
 
-        println!("Attributes:");
-
-        for attribute in &class.attributes {
-            println!("\t- {:?}", attribute.attribute_type);
-        }
+        println!(
+            "Attributes: {:?}",
+            class
+                .attributes
+                .iter()
+                .map(|x| &x.attribute_type)
+                .collect::<Vec<_>>()
+        );
 
         Self { config, class }
     }
