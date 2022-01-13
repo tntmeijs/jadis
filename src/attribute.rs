@@ -287,7 +287,6 @@ impl AttributeInfo {
                 Self {
                     attribute_type,
                     data: Box::new(Self::read_data_as_deprecated(
-                        reader,
                         attribute_name_index,
                         attribute_length,
                     )),
@@ -711,14 +710,13 @@ impl AttributeInfo {
 
     /// Read the data blob as a deprecated attribute
     fn read_data_as_deprecated(
-        reader: &mut ByteReader,
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeDeprecated {
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.15
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeDeprecated {}
+        AttributeDeprecated {
+            attribute_name_index,
+            attribute_length,
+        }
     }
 
     /// Read the data blob as a runtime visible annotations attribute
@@ -1123,7 +1121,12 @@ impl Attribute for AttributeLocalVariableTypeTable {
     }
 }
 
-pub struct AttributeDeprecated {}
+/// The deprecated attribute is used to indicate that the class, interface, method, or field has been superseded
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.15
+pub struct AttributeDeprecated {
+    attribute_name_index: u16,
+    attribute_length: u32,
+}
 
 impl Attribute for AttributeDeprecated {
     fn as_concrete_type(&self) -> &dyn Any {
