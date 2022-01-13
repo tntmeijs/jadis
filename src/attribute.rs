@@ -635,10 +635,13 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeSourceFile {
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.10
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeSourceFile {}
+        let sourcefile_index = to_u16(&reader.read_n_bytes(2));
+
+        AttributeSourceFile {
+            attribute_name_index,
+            attribute_length,
+            sourcefile_index,
+        }
     }
 
     /// Read the data blob as a source debug extension attribute
@@ -1035,7 +1038,13 @@ impl Attribute for AttributeSignature {
     }
 }
 
-pub struct AttributeSourceFile {}
+/// Source file attributes represent the name of the source file from which this class file was compiled
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.10
+pub struct AttributeSourceFile {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    sourcefile_index: u16,
+}
 
 impl Attribute for AttributeSourceFile {
     fn as_concrete_type(&self) -> &dyn Any {
