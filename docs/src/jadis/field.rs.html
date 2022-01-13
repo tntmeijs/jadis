@@ -76,8 +76,8 @@
     <span class="doccomment">/// Create a new field from a class file binary blob</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ByteReader</span>, <span class="ident">constant_pool</span>: <span class="kw-2">&amp;</span><span class="ident">ConstantPoolContainer</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">access_flags</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::read_access_flags</span>(<span class="ident">reader</span>);
-        <span class="kw">let</span> <span class="ident">name_index</span> <span class="op">=</span> <span class="ident">to_u16</span>(<span class="ident">reader</span>.<span class="ident">read_n_bytes</span>(<span class="number">2</span>));
-        <span class="kw">let</span> <span class="ident">descriptor_index</span> <span class="op">=</span> <span class="ident">to_u16</span>(<span class="ident">reader</span>.<span class="ident">read_n_bytes</span>(<span class="number">2</span>));
+        <span class="kw">let</span> <span class="ident">name_index</span> <span class="op">=</span> <span class="ident">to_u16</span>(<span class="kw-2">&amp;</span><span class="ident">reader</span>.<span class="ident">read_n_bytes</span>(<span class="number">2</span>));
+        <span class="kw">let</span> <span class="ident">descriptor_index</span> <span class="op">=</span> <span class="ident">to_u16</span>(<span class="kw-2">&amp;</span><span class="ident">reader</span>.<span class="ident">read_n_bytes</span>(<span class="number">2</span>));
         <span class="kw">let</span> <span class="ident">attributes</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::read_attributes</span>(<span class="ident">reader</span>, <span class="ident">constant_pool</span>);
 
         <span class="self">Self</span> {
@@ -90,7 +90,7 @@
 
     <span class="doccomment">/// Read field access flags</span>
     <span class="kw">fn</span> <span class="ident">read_access_flags</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ByteReader</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">FieldAccessFlags</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">bitmask</span> <span class="op">=</span> <span class="ident">to_u16</span>(<span class="ident">reader</span>.<span class="ident">read_n_bytes</span>(<span class="number">2</span>));
+        <span class="kw">let</span> <span class="ident">bitmask</span> <span class="op">=</span> <span class="ident">to_u16</span>(<span class="kw-2">&amp;</span><span class="ident">reader</span>.<span class="ident">read_n_bytes</span>(<span class="number">2</span>));
         <span class="ident">FieldAccessFlags::from_u16</span>(<span class="ident">bitmask</span>)
     }
 
@@ -99,7 +99,7 @@
         <span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ByteReader</span>,
         <span class="ident">constant_pool</span>: <span class="kw-2">&amp;</span><span class="ident">ConstantPoolContainer</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AttributeInfo</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">attributes_count</span> <span class="op">=</span> <span class="ident">to_u16</span>(<span class="ident">reader</span>.<span class="ident">read_n_bytes</span>(<span class="number">2</span>));
+        <span class="kw">let</span> <span class="ident">attributes_count</span> <span class="op">=</span> <span class="ident">to_u16</span>(<span class="kw-2">&amp;</span><span class="ident">reader</span>.<span class="ident">read_n_bytes</span>(<span class="number">2</span>));
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">attributes</span> <span class="op">=</span> <span class="macro">vec!</span>[];
 
         <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">attributes_count</span> {

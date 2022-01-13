@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["constant_pool","Represents an entity in the constant pool section of a class file"]],"struct":[["ClassFile","JVM class file representation"]]});

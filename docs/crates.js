@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["jadis"];
+window.ALL_CRATES = ["classfile","disassembler","jadis"];

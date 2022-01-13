@@ -1,0 +1,37 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Introduction"><meta name="keywords" content="rust, rustlang, rust-lang, disassembler"><title>disassembler - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../disassembler/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><h2 class="location">Crate disassembler</h2><div class="block version"><p>Version 0.1.0</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all disassembler's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#functions">Functions</a></li></ul></div><div id="sidebar-vars" data-name="disassembler" data-ty="mod" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">disassembler</a><button id="copy-path" onclick="copy_path(this)" title="copy path"><img src="../clipboard.svg" width="19" height="18" alt="Copy item import" title="Copy item import to clipboard"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/disassembler/main.rs.html#1-198" title="goto source code">[src]</a></span></h1><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h1 id="introduction" class="section-header"><a href="#introduction">Introduction</a></h1>
+<p>The Jadis crate is a Java Virtual Machine language disassembler written in Rust.
+This project has been written for educational purposes, however, Jadis can theoretically be used as a drop-in replacement of <a href="https://docs.oracle.com/javase/7/docs/technotes/tools/windows/javap.html"><code>javap</code></a>.</p>
+<h1 id="using-jadis" class="section-header"><a href="#using-jadis">Using Jadis</a></h1>
+<p>It is fairly straightforward to use Jadis. Simply run the project and use the same command-line arguments you would use with <a href="https://docs.oracle.com/javase/7/docs/technotes/tools/windows/javap.html"><code>javap</code></a>.
+Please do note that the output format could be slightly different than the output you are used to.
+Having said that, though, the data in the output should be identical to the output of the disassembler that came with your JDK.</p>
+<table><thead><tr><th>option</th><th>description</th></tr></thead><tbody>
+<tr><td>–bootclasspath</td><td>Override location of bootstrap class files</td></tr>
+<tr><td>–class-path</td><td>Specify where to find user class files</td></tr>
+<tr><td>–classpath</td><td>Specify where to find user class files</td></tr>
+<tr><td>-c</td><td>Disassemble the code</td></tr>
+<tr><td>–constants</td><td>Show final constants</td></tr>
+<tr><td>–cp</td><td>Specify where to find user class files</td></tr>
+<tr><td>-h, –help</td><td>Print this help message</td></tr>
+<tr><td>-J</td><td>Specify a VM option</td></tr>
+<tr><td>-l</td><td>Print line number and local variable tables</td></tr>
+<tr><td>-m, –module</td><td>Specify module containing classes to be disassembled</td></tr>
+<tr><td>–module-path</td><td>Specify where to find application modules</td></tr>
+<tr><td>–multi-release</td><td>Specify the version to use in multi-release JAR files</td></tr>
+<tr><td>–package</td><td>Show package/protected/public classes and members (default)</td></tr>
+<tr><td>-p, –private</td><td>Show all classes and members</td></tr>
+<tr><td>–protected</td><td>Show protected/public classes and members</td></tr>
+<tr><td>–public</td><td>Show only public classes and members</td></tr>
+<tr><td>-s</td><td>Print internal type signatures</td></tr>
+<tr><td>–sysinfo</td><td>Show system info (path, size, date, SHA-256 hash) of class being processed</td></tr>
+<tr><td>–system</td><td>Specify where to find system modules</td></tr>
+<tr><td>-V, –version</td><td>Version information</td></tr>
+<tr><td>-v, –verbose</td><td>Print additional information</td></tr>
+</tbody></table>
+</div></details><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<table><tr class="module-item"><td><a class="mod" href="disassembler/index.html" title="disassembler::disassembler mod">disassembler</a></td><td class="docblock-short"><p>Java Virtual Machine language disassembler</p>
+</td></tr></table><h2 id="functions" class="section-header"><a href="#functions">Functions</a></h2>
+<table><tr class="module-item"><td><a class="fn" href="fn.main.html" title="disassembler::main fn">main</a></td><td class="docblock-short"><p>Application entry point</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="disassembler" data-search-index-js="../search-index.js" data-search-js="../search.js"></div><script src="../main.js"></script></body></html>
