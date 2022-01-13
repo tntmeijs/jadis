@@ -665,10 +665,24 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeLineNumberTable {
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.12
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeLineNumberTable {}
+        let line_number_table_length = to_u16(&reader.read_n_bytes(2));
+
+        let mut line_number_table = vec![];
+        for _ in 0..line_number_table_length {
+            let start_pc = to_u16(&reader.read_n_bytes(2));
+            let line_number = to_u16(&reader.read_n_bytes(2));
+
+            line_number_table.push(LineNumberTableEntry {
+                start_pc,
+                line_number,
+            });
+        }
+
+        AttributeLineNumberTable {
+            attribute_name_index,
+            attribute_length,
+            line_number_table,
+        }
     }
 
     /// Read the data blob as a local variable table attribute
@@ -1069,7 +1083,23 @@ impl Attribute for AttributeSourceDebugExtension {
     }
 }
 
-pub struct AttributeLineNumberTable {}
+/// Represents an entry in the line number table in a line number table attribute
+struct LineNumberTableEntry {
+    /// Indicates the index into the code array at which the code for a new line in the original source file begins
+    start_pc: u16,
+
+    /// Gives the corresponding line number in the original source file
+    line_number: u16,
+}
+
+/// A line number table attribute may be used by debuggers to determine which part of the code array corresponds to a given
+/// line number in the original source file
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.12
+pub struct AttributeLineNumberTable {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    line_number_table: Vec<LineNumberTableEntry>,
+}
 
 impl Attribute for AttributeLineNumberTable {
     fn as_concrete_type(&self) -> &dyn Any {
