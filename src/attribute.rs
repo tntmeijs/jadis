@@ -608,10 +608,10 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeSynthetic {
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.8
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeSynthetic {}
+        AttributeSynthetic {
+            attribute_name_index,
+            attribute_length,
+        }
     }
 
     /// Read the data blob as a signature attribute
@@ -1004,7 +1004,12 @@ impl Attribute for AttributeEnclosingMethod {
     }
 }
 
-pub struct AttributeSynthetic {}
+/// Synthetic attributes represent class members that do not appear in the source code
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.8
+pub struct AttributeSynthetic {
+    attribute_name_index: u16,
+    attribute_length: u32,
+}
 
 impl Attribute for AttributeSynthetic {
     fn as_concrete_type(&self) -> &dyn Any {
