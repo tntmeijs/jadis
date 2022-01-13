@@ -650,10 +650,13 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeSourceDebugExtension {
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.11
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeSourceDebugExtension {}
+        let debug_extension = reader.read_n_bytes(attribute_length as usize);
+
+        AttributeSourceDebugExtension {
+            attribute_name_index,
+            attribute_length,
+            debug_extension,
+        }
     }
 
     /// Read the data blob as a line number table attribute
@@ -1052,7 +1055,13 @@ impl Attribute for AttributeSourceFile {
     }
 }
 
-pub struct AttributeSourceDebugExtension {}
+/// Holds extended debugging information which has no semantic effect on the Java Virtual Machine
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.11
+pub struct AttributeSourceDebugExtension {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    debug_extension: Vec<u8>,
+}
 
 impl Attribute for AttributeSourceDebugExtension {
     fn as_concrete_type(&self) -> &dyn Any {
