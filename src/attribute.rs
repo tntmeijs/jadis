@@ -545,6 +545,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeStackMapTable {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.4
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -578,6 +579,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeInnerClasses {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.6
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -690,6 +692,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeLocalVariableTable {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.13
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -702,6 +705,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeLocalVariableTypeTable {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.14
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -725,6 +729,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeRuntimeVisibleAnnotations {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.16
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -737,6 +742,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeRuntimeInvisibleAnnotations {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.17
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -749,6 +755,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeRuntimeVisibleParameterAnnotations {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.18
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -761,6 +768,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeRuntimeInvisibleParameterAnnotations {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.19
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -773,6 +781,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeRuntimeVisibleTypeAnnotations {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.20
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -785,6 +794,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeRuntimeInvisibleTypeAnnotations {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.21
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -797,6 +807,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeAnnotationDefault {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.22
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -809,6 +820,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeBootstrapMethods {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.23
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -821,6 +833,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeMethodParameters {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.24
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -833,6 +846,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeModule {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.25
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -845,6 +859,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeModulePackages {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.26
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -857,6 +872,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeModuleMainClass {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.27
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -869,6 +885,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeNestHost {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.28
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -881,6 +898,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeNestMembers {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.29
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -893,6 +911,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeRecord {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.30
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
@@ -905,6 +924,7 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributePermittedSubclasses {
+        todo!();
         // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.31
         // Simply skip this attribute's data
         reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
