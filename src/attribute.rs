@@ -933,6 +933,7 @@ impl AttributeInfo {
 }
 
 /// Represents the value of a constant expression
+/// 
 /// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.2
 pub struct AttributeConstantValue {
     /// Index into the constant pool that stores the attribute's name
@@ -969,6 +970,7 @@ struct ExceptionTableEntry {
 
 /// A code attribute contains the Java Virtual Machine instructions and auxilary information for a method, including an instance
 /// initialization method and a class or interface initialization method
+/// 
 /// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.3
 pub struct AttributeCode {
     /// Index into the constant pool that stores the attribute's name
@@ -1008,6 +1010,7 @@ impl Attribute for AttributeStackMapTable {
 }
 
 /// Exceptions attributes indicate which checked exceptions a method may throw
+/// 
 /// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.5
 pub struct AttributeExceptions {
     attribute_name_index: u16,
@@ -1031,6 +1034,7 @@ impl Attribute for AttributeInnerClasses {
 }
 
 /// A class must have an enclosing method attribute if and only if it represents a local class or an anonymous class
+/// 
 /// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.7
 pub struct AttributeEnclosingMethod {
     attribute_name_index: u16,
@@ -1046,6 +1050,7 @@ impl Attribute for AttributeEnclosingMethod {
 }
 
 /// Synthetic attributes represent class members that do not appear in the source code
+/// 
 /// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.8
 pub struct AttributeSynthetic {
     attribute_name_index: u16,
@@ -1060,6 +1065,7 @@ impl Attribute for AttributeSynthetic {
 
 /// A Signature attribute stores a signature (§4.7.9.1) for a class, interface, constructor, method, field, or record component
 /// whose declaration in the Java programming language uses type variables or parameterized types
+/// 
 /// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.9
 pub struct AttributeSignature {
     attribute_name_index: u16,
@@ -1074,6 +1080,7 @@ impl Attribute for AttributeSignature {
 }
 
 /// Source file attributes represent the name of the source file from which this class file was compiled
+/// 
 /// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.10
 pub struct AttributeSourceFile {
     attribute_name_index: u16,
@@ -1088,6 +1095,7 @@ impl Attribute for AttributeSourceFile {
 }
 
 /// Holds extended debugging information which has no semantic effect on the Java Virtual Machine
+/// 
 /// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.11
 pub struct AttributeSourceDebugExtension {
     attribute_name_index: u16,
@@ -1112,6 +1120,7 @@ struct LineNumberTableEntry {
 
 /// A line number table attribute may be used by debuggers to determine which part of the code array corresponds to a given
 /// line number in the original source file
+/// 
 /// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.12
 pub struct AttributeLineNumberTable {
     attribute_name_index: u16,
@@ -1142,6 +1151,7 @@ impl Attribute for AttributeLocalVariableTypeTable {
 }
 
 /// The deprecated attribute is used to indicate that the class, interface, method, or field has been superseded
+/// 
 /// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.15
 pub struct AttributeDeprecated {
     attribute_name_index: u16,
