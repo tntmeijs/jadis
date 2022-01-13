@@ -558,10 +558,19 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeExceptions {
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.5
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeExceptions {}
+        let number_of_exceptions = to_u16(&reader.read_n_bytes(2));
+
+        let mut exception_index_table = vec![];
+        for _ in 0..number_of_exceptions {
+            exception_index_table.push(to_u16(&reader.read_n_bytes(2)));
+        }
+
+        AttributeExceptions {
+            attribute_name_index,
+            attribute_length,
+            number_of_exceptions,
+            exception_index_table,
+        }
     }
 
     /// Read the data blob as an inner classes attribute
@@ -952,7 +961,14 @@ impl Attribute for AttributeStackMapTable {
     }
 }
 
-pub struct AttributeExceptions {}
+/// Exceptions attributes indicate which checked exceptions a method may throw
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.5
+pub struct AttributeExceptions {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    number_of_exceptions: u16,
+    exception_index_table: Vec<u16>,
+}
 
 impl Attribute for AttributeExceptions {
     fn as_concrete_type(&self) -> &dyn Any {
