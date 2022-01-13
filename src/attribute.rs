@@ -620,10 +620,13 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeSignature {
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.9
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeSignature {}
+        let signature_index = to_u16(&reader.read_n_bytes(2));
+
+        AttributeSignature {
+            attribute_name_index,
+            attribute_length,
+            signature_index,
+        }
     }
 
     /// Read the data blob as a source file attribute
@@ -1017,7 +1020,14 @@ impl Attribute for AttributeSynthetic {
     }
 }
 
-pub struct AttributeSignature {}
+/// A Signature attribute stores a signature (§4.7.9.1) for a class, interface, constructor, method, field, or record component
+/// whose declaration in the Java programming language uses type variables or parameterized types
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.9
+pub struct AttributeSignature {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    signature_index: u16,
+}
 
 impl Attribute for AttributeSignature {
     fn as_concrete_type(&self) -> &dyn Any {
