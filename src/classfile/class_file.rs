@@ -3,13 +3,14 @@
 //! This module is used to add class format parsing functionality to Jadis
 //! Do note that the actual file IO is not handled by this module
 
-use crate::attribute::AttributeInfo;
 use crate::byte_reader::ByteReader;
-use crate::constant_pool::{ConstantClassInfo, ConstantPoolContainer, ConstantPoolInfo, Tag};
-use crate::field::FieldInfo;
 use crate::flags::{ClassAccessFlags, Flags};
-use crate::method::MethodInfo;
 use crate::utils::{to_u16, to_u32};
+
+use super::{ConstantClassInfo, ConstantPoolContainer, ConstantPoolInfo, Tag};
+use super::AttributeInfo;
+use super::FieldInfo;
+use super::MethodInfo;
 
 const MAGIC_NUMBER: u32 = 0xCAFEBABE;
 

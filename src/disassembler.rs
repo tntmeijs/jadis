@@ -5,7 +5,8 @@
 //! Obviously it is not a direct replacement as this module has been written for educational purposes.
 //! However, the disassembler should function well enough that it can theoretically be used as a drop-in replacement for [`javap`](https://docs.oracle.com/javase/7/docs/technotes/tools/windows/javap.html).
 
-use crate::{byte_reader::ByteReader, class_file::ClassFile};
+use crate::{byte_reader::ByteReader};
+use crate::classfile::ClassFile;
 
 /// Controls which access level shows up in the output
 pub enum DisassemblerVisibility {
@@ -121,71 +122,71 @@ impl<'a> Disassembler<'a> {
 
         for entry in class.constant_pool.values() {
             match entry.tag {
-                crate::constant_pool::Tag::ConstantUtf8 => {
+                crate::classfile::Tag::ConstantUtf8 => {
                     let concrete = entry.try_cast_into_utf8().unwrap();
                     println!("#{} = Utf8", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantInteger => {
+                crate::classfile::Tag::ConstantInteger => {
                     let concrete = entry.try_cast_into_integer().unwrap();
                     println!("#{} = Integer", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantFloat => {
+                crate::classfile::Tag::ConstantFloat => {
                     let concrete = entry.try_cast_into_float().unwrap();
                     println!("#{} = Float", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantLong => {
+                crate::classfile::Tag::ConstantLong => {
                     let concrete = entry.try_cast_into_long().unwrap();
                     println!("#{} = Long", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantDouble => {
+                crate::classfile::Tag::ConstantDouble => {
                     let concrete = entry.try_cast_into_double().unwrap();
                     println!("#{} = Double", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantClass => {
+                crate::classfile::Tag::ConstantClass => {
                     let concrete = entry.try_cast_into_class().unwrap();
                     println!("#{} = Class", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantString => {
+                crate::classfile::Tag::ConstantString => {
                     let concrete = entry.try_cast_into_string().unwrap();
                     println!("#{} = String", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantFieldRef => {
+                crate::classfile::Tag::ConstantFieldRef => {
                     let concrete = entry.try_cast_into_field_ref().unwrap();
                     println!("#{} = FieldRef", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantMethodRef => {
+                crate::classfile::Tag::ConstantMethodRef => {
                     let concrete = entry.try_cast_into_method_ref().unwrap();
                     println!("#{} = MethodRef", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantInterfaceMethodRef => {
+                crate::classfile::Tag::ConstantInterfaceMethodRef => {
                     let concrete = entry.try_cast_into_interface_method_ref().unwrap();
                     println!("#{} = InterfaceMethodRef", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantNameAndType => {
+                crate::classfile::Tag::ConstantNameAndType => {
                     let concrete = entry.try_cast_into_name_and_type().unwrap();
                     println!("#{} = ConstantNameAndType", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantMethodHandle => {
+                crate::classfile::Tag::ConstantMethodHandle => {
                     let concrete = entry.try_cast_into_method_handle().unwrap();
                     println!("#{} = MethodHandle", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantMethodType => {
+                crate::classfile::Tag::ConstantMethodType => {
                     let concrete = entry.try_cast_into_method_type().unwrap();
                     println!("#{} = MethodType", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantDynamic => {
+                crate::classfile::Tag::ConstantDynamic => {
                     let concrete = entry.try_cast_into_dynamic().unwrap();
                     println!("#{} = Dynamic", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantInvokeDynamic => {
+                crate::classfile::Tag::ConstantInvokeDynamic => {
                     let concrete = entry.try_cast_into_invoke_dynamic().unwrap();
                     println!("#{} = InvokeDynamic", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantModule => {
+                crate::classfile::Tag::ConstantModule => {
                     let concrete = entry.try_cast_into_module().unwrap();
                     println!("#{} = Module", concrete.constant_pool_index);
                 }
-                crate::constant_pool::Tag::ConstantPackage => {
+                crate::classfile::Tag::ConstantPackage => {
                     let concrete = entry.try_cast_into_package().unwrap();
                     println!("#{} = Package", concrete.constant_pool_index);
                 }

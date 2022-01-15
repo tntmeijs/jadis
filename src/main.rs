@@ -34,17 +34,13 @@
 use clap::{App, AppSettings, Arg};
 
 use byte_reader::ByteReader;
-use disassembler::{DisassemblerConfig, Disassembler, DisassemblerVisibility};
+use disassembler::{Disassembler, DisassemblerConfig, DisassemblerVisibility};
 
-mod attribute;
 mod byte_reader;
-mod class_file;
-mod constant_pool;
 mod disassembler;
-mod field;
 mod flags;
-mod method;
 mod utils;
+mod classfile;
 
 /// Application entry point
 fn main() {

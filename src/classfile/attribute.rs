@@ -6,10 +6,11 @@ use std::any::Any;
 
 use crate::{
     byte_reader::ByteReader,
-    constant_pool::ConstantPoolContainer,
     utils::{to_u16, to_u32},
 };
 use crate::flags::{Flags, MethodParameterAccessFlags, ModuleExportsFlags, ModuleFlags, ModuleOpensFlags, ModuleRequiresFlags, NestedClassAccessFlags};
+
+use super::ConstantPoolContainer;
 
 /// Base trait to store specialised attributes
 trait Attribute {
