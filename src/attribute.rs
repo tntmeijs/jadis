@@ -211,7 +211,6 @@ impl AttributeInfo {
                 Self {
                     attribute_type,
                     data: Box::new(Self::read_data_as_synthetic(
-                        reader,
                         attribute_name_index,
                         attribute_length,
                     )),
@@ -624,7 +623,6 @@ impl AttributeInfo {
 
     /// Read the data blob as a synthetic attribute
     fn read_data_as_synthetic(
-        reader: &mut ByteReader,
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeSynthetic {
@@ -711,11 +709,29 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeLocalVariableTable {
-        todo!();
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.13
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeLocalVariableTable {}
+        let mut local_variable_table = vec![];
+        let local_variable_table_length = to_u16(&reader.read_n_bytes(2));
+        for _ in 0..local_variable_table_length {
+            let start_pc = to_u16(&reader.read_n_bytes(2));
+            let length = to_u16(&reader.read_n_bytes(2));
+            let name_index = to_u16(&reader.read_n_bytes(2));
+            let descriptor_index = to_u16(&reader.read_n_bytes(2));
+            let index = to_u16(&reader.read_n_bytes(2));
+
+            local_variable_table.push(LocalVariableTableEntry {
+                start_pc,
+                length,
+                name_index,
+                descriptor_index,
+                index
+            });
+        }
+
+        AttributeLocalVariableTable {
+            attribute_name_index,
+            attribute_length,
+            local_variable_table
+        }
     }
 
     /// Read the data blob as a local variable type table attribute
@@ -1100,7 +1116,7 @@ impl AttributeInfo {
         AttributePermittedSubclasses {
             attribute_name_index,
             attribute_length,
-            classes
+            classes,
         }
     }
 }
@@ -1322,7 +1338,26 @@ impl Attribute for AttributeLineNumberTable {
     }
 }
 
-pub struct AttributeLocalVariableTable {}
+/// Indicates a range of code array offsets within which a local variable has a value, and indicates
+/// the index into the local variable array of the current frame at which that local variable can be
+/// found
+struct LocalVariableTableEntry {
+    start_pc: u16,
+    length: u16,
+    name_index: u16,
+    descriptor_index: u16,
+    index: u16,
+}
+
+/// May be used by debuggers to determine the value of a given local variable during the execution
+/// of a method
+///
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.13
+pub struct AttributeLocalVariableTable {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    local_variable_table: Vec<LocalVariableTableEntry>,
+}
 
 impl Attribute for AttributeLocalVariableTable {
     fn as_concrete_type(&self) -> &dyn Any {
@@ -1605,7 +1640,7 @@ impl Attribute for AttributeRecord {
 pub struct AttributePermittedSubclasses {
     attribute_name_index: u16,
     attribute_length: u32,
-    classes: Vec<u16>
+    classes: Vec<u16>,
 }
 
 impl Attribute for AttributePermittedSubclasses {
