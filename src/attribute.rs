@@ -9,7 +9,7 @@ use crate::{
     constant_pool::ConstantPoolContainer,
     utils::{to_u16, to_u32},
 };
-use crate::access_flags::{AccessFlags, NestedClassAccessFlags};
+use crate::access_flags::{AccessFlags, MethodParameterAccessFlags, NestedClassAccessFlags};
 
 /// Base trait to store specialised attributes
 trait Attribute {
@@ -866,11 +866,21 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeMethodParameters {
-        todo!();
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.24
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeMethodParameters {}
+        let parameters_count = to_u16(&reader.read_n_bytes(2));
+        let mut parameters = vec![];
+
+        for _ in 0..parameters_count {
+            let name_index = to_u16(&reader.read_n_bytes(2));
+            let access_flags = MethodParameterAccessFlags::from_u16(to_u16(&reader.read_n_bytes(2)));
+
+            parameters.push(MethodParameterEntry { name_index, access_flags })
+        }
+
+        AttributeMethodParameters {
+            attribute_name_index,
+            attribute_length,
+            parameters,
+        }
     }
 
     /// Read the data blob as a module attribute
@@ -1291,7 +1301,23 @@ impl Attribute for AttributeBootstrapMethods {
     }
 }
 
-pub struct AttributeMethodParameters {}
+/// Represents information about a method parameter
+struct MethodParameterEntry {
+    /// Index into the constant pool representing a valid unqualified name denoting a formal parameter
+    name_index: u16,
+
+    /// Parameter access flags
+    access_flags: Vec<MethodParameterAccessFlags>,
+}
+
+/// Records information about the formal parameters of a method, such as their names
+///
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.24
+pub struct AttributeMethodParameters {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    parameters: Vec<MethodParameterEntry>,
+}
 
 impl Attribute for AttributeMethodParameters {
     fn as_concrete_type(&self) -> &dyn Any {
