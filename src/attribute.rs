@@ -1091,11 +1091,17 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributePermittedSubclasses {
-        todo!();
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.31
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributePermittedSubclasses {}
+        let mut classes = vec![];
+        let number_of_classes = to_u16(&reader.read_n_bytes(2));
+        for _ in 0..number_of_classes {
+            classes.push(to_u16(&reader.read_n_bytes(2)));
+        }
+
+        AttributePermittedSubclasses {
+            attribute_name_index,
+            attribute_length,
+            classes
+        }
     }
 }
 
@@ -1592,7 +1598,15 @@ impl Attribute for AttributeRecord {
     }
 }
 
-pub struct AttributePermittedSubclasses {}
+/// The PermittedSubclasses attribute records the classes and interfaces that are authorized to
+/// directly extend or implement the current class or interface
+///
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.31
+pub struct AttributePermittedSubclasses {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    classes: Vec<u16>
+}
 
 impl Attribute for AttributePermittedSubclasses {
     fn as_concrete_type(&self) -> &dyn Any {
