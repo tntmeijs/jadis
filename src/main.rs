@@ -34,7 +34,7 @@
 use clap::{App, AppSettings, Arg};
 
 use byte_reader::ByteReader;
-use disassembler::{DisassemberConfig, Disassembler, DisassemblerVisibility};
+use disassembler::{DisassemblerConfig, Disassembler, DisassemblerVisibility};
 
 mod attribute;
 mod byte_reader;
@@ -157,7 +157,7 @@ fn main() {
         )
         .get_matches();
 
-    let mut disassembler_config = DisassemberConfig::new();
+    let mut disassembler_config = DisassemblerConfig::new();
 
     if matches.is_present("verbose") {
         //

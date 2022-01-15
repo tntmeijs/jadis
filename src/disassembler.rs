@@ -23,7 +23,7 @@ pub enum DisassemblerVisibility {
 }
 
 /// Data needed to create a disassembler
-pub struct DisassemberConfig {
+pub struct DisassemblerConfig {
     /// Class and member visibility setting
     visibility: DisassemblerVisibility,
 
@@ -46,13 +46,13 @@ pub struct DisassemberConfig {
 /// Java Virtual Machine disassembler
 pub struct Disassembler<'a> {
     /// Used to customize the disassembler's behaviour
-    config: &'a DisassemberConfig,
+    config: &'a DisassemblerConfig,
 
     /// Disassembled class file information
     class: ClassFile,
 }
 
-impl DisassemberConfig {
+impl DisassemblerConfig {
     /// Create a new disassember instance
     pub fn new() -> Self {
         Self {
@@ -97,7 +97,7 @@ impl DisassemberConfig {
 }
 
 impl<'a> Disassembler<'a> {
-    pub fn new(config: &'a DisassemberConfig, reader: &mut ByteReader) -> Self {
+    pub fn new(config: &'a DisassemblerConfig, reader: &mut ByteReader) -> Self {
         let class = ClassFile::new(reader);
 
         // TODO: remove debug printing
