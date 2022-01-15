@@ -1008,11 +1008,13 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeModuleMainClass {
-        todo!();
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.27
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeModuleMainClass {}
+        let main_class_index = to_u16(&reader.read_n_bytes(2));
+
+        AttributeModuleMainClass {
+            attribute_name_index,
+            attribute_length,
+            main_class_index
+        }
     }
 
     /// Read the data blob as a nest host attribute
@@ -1491,7 +1493,14 @@ impl Attribute for AttributeModulePackages {
     }
 }
 
-pub struct AttributeModuleMainClass {}
+/// The ModuleMainClass attribute indicates the main class of a module
+///
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.27
+pub struct AttributeModuleMainClass {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    main_class_index: u16
+}
 
 impl Attribute for AttributeModuleMainClass {
     fn as_concrete_type(&self) -> &dyn Any {
