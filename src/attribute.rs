@@ -455,6 +455,7 @@ impl AttributeInfo {
                         reader,
                         attribute_name_index,
                         attribute_length,
+                        constant_pool,
                     )),
                 }
             }
@@ -1047,7 +1048,7 @@ impl AttributeInfo {
         AttributeNestMembers {
             attribute_name_index,
             attribute_length,
-            classes
+            classes,
         }
     }
 
@@ -1056,12 +1057,32 @@ impl AttributeInfo {
         reader: &mut ByteReader,
         attribute_name_index: u16,
         attribute_length: u32,
+        constant_pool: &ConstantPoolContainer,
     ) -> AttributeRecord {
-        todo!();
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.30
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeRecord {}
+        let mut components = vec![];
+        let components_count = to_u16(&reader.read_n_bytes(2));
+        for _ in 0..components_count {
+            let name_index = to_u16(&reader.read_n_bytes(2));
+            let descriptor_index = to_u16(&reader.read_n_bytes(2));
+
+            let mut attributes = vec![];
+            let attributes_count = to_u16(&reader.read_n_bytes(2));
+            for _ in 0..attributes_count {
+                attributes.push(AttributeInfo::new(reader, constant_pool));
+            }
+
+            components.push(RecordComponentInfo {
+                name_index,
+                descriptor_index,
+                attributes,
+            });
+        }
+
+        AttributeRecord {
+            attribute_name_index,
+            attribute_length,
+            components,
+        }
     }
 
     /// Read the data blob as a permitted subclasses attribute
@@ -1548,7 +1569,22 @@ impl Attribute for AttributeNestMembers {
     }
 }
 
-pub struct AttributeRecord {}
+/// Specifies a record component of the current class
+struct RecordComponentInfo {
+    name_index: u16,
+    descriptor_index: u16,
+    attributes: Vec<AttributeInfo>,
+}
+
+///  The Record attribute indicates that the current class is a record class, and stores information
+/// about the record components of the record class
+///
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.30
+pub struct AttributeRecord {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    components: Vec<RecordComponentInfo>,
+}
 
 impl Attribute for AttributeRecord {
     fn as_concrete_type(&self) -> &dyn Any {
