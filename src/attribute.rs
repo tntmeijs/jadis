@@ -998,7 +998,7 @@ impl AttributeInfo {
         AttributeModulePackages {
             attribute_name_index,
             attribute_length,
-            package_index
+            package_index,
         }
     }
 
@@ -1013,7 +1013,7 @@ impl AttributeInfo {
         AttributeModuleMainClass {
             attribute_name_index,
             attribute_length,
-            main_class_index
+            main_class_index,
         }
     }
 
@@ -1023,11 +1023,13 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeNestHost {
-        todo!();
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.28
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeNestHost {}
+        let host_class_index = to_u16(&reader.read_n_bytes(2));
+
+        AttributeNestHost {
+            attribute_name_index,
+            attribute_length,
+            host_class_index
+        }
     }
 
     /// Read the data blob as a nest members attribute
@@ -1499,7 +1501,7 @@ impl Attribute for AttributeModulePackages {
 pub struct AttributeModuleMainClass {
     attribute_name_index: u16,
     attribute_length: u32,
-    main_class_index: u16
+    main_class_index: u16,
 }
 
 impl Attribute for AttributeModuleMainClass {
@@ -1508,7 +1510,15 @@ impl Attribute for AttributeModuleMainClass {
     }
 }
 
-pub struct AttributeNestHost {}
+/// The NestHost attribute records the nest host of the nest to which the current class or interface
+/// claims to belong
+///
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.28
+pub struct AttributeNestHost {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    host_class_index: u16,
+}
 
 impl Attribute for AttributeNestHost {
     fn as_concrete_type(&self) -> &dyn Any {
