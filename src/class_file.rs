@@ -3,17 +3,15 @@
 //! This module is used to add class format parsing functionality to Jadis
 //! Do note that the actual file IO is not handled by this module
 
-use crate::access_flags::{Flags, ClassAccessFlags};
 use crate::attribute::AttributeInfo;
 use crate::byte_reader::ByteReader;
 use crate::constant_pool::{ConstantClassInfo, ConstantPoolContainer, ConstantPoolInfo, Tag};
 use crate::field::FieldInfo;
+use crate::flags::{ClassAccessFlags, Flags};
 use crate::method::MethodInfo;
 use crate::utils::{to_u16, to_u32};
 
 const MAGIC_NUMBER: u32 = 0xCAFEBABE;
-const SIZE_BYTES_U16: usize = 2;
-const SIZE_BYTES_U32: usize = 4;
 
 /// JVM class file representation
 pub struct ClassFile {
@@ -83,7 +81,7 @@ impl ClassFile {
 
     /// Read the magic number (always 0xCAFEBABE)
     fn read_magic_number(reader: &mut ByteReader) -> u32 {
-        let magic_number = to_u32(&reader.read_n_bytes(SIZE_BYTES_U32));
+        let magic_number = to_u32(&reader.read_n_bytes(4));
 
         assert_eq!(
             magic_number, MAGIC_NUMBER,
@@ -96,7 +94,7 @@ impl ClassFile {
 
     /// Read a number (u16) from a binary blob
     fn read_u16(reader: &mut ByteReader) -> u16 {
-        to_u16(&reader.read_n_bytes(SIZE_BYTES_U16))
+        to_u16(&reader.read_n_bytes(2))
     }
 
     /// Read the entire constant pool

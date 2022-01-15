@@ -36,13 +36,13 @@ use clap::{App, AppSettings, Arg};
 use byte_reader::ByteReader;
 use disassembler::{DisassemberConfig, Disassembler, DisassemblerVisibility};
 
-mod access_flags;
 mod attribute;
 mod byte_reader;
 mod class_file;
 mod constant_pool;
 mod disassembler;
 mod field;
+mod flags;
 mod method;
 mod utils;
 

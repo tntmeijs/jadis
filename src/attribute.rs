@@ -9,7 +9,7 @@ use crate::{
     constant_pool::ConstantPoolContainer,
     utils::{to_u16, to_u32},
 };
-use crate::access_flags::{Flags, MethodParameterAccessFlags, ModuleExportsFlags, ModuleFlags, ModuleOpensFlags, ModuleRequiresFlags, NestedClassAccessFlags};
+use crate::flags::{Flags, MethodParameterAccessFlags, ModuleExportsFlags, ModuleFlags, ModuleOpensFlags, ModuleRequiresFlags, NestedClassAccessFlags};
 
 /// Base trait to store specialised attributes
 trait Attribute {
@@ -749,19 +749,19 @@ impl AttributeInfo {
             let signature_index = to_u16(&reader.read_n_bytes(2));
             let index = to_u16(&reader.read_n_bytes(2));
 
-            local_variable_type_table.push(LocalVariableTypeTableEntry{
+            local_variable_type_table.push(LocalVariableTypeTableEntry {
                 start_pc,
                 length,
                 name_index,
                 signature_index,
-                index
+                index,
             });
         }
 
         AttributeLocalVariableTypeTable {
             attribute_name_index,
             attribute_length,
-            local_variable_type_table
+            local_variable_type_table,
         }
     }
 

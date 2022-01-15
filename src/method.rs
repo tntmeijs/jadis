@@ -3,10 +3,10 @@
 //! Reference: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.6
 
 use crate::{
-    access_flags::MethodAccessFlags, attribute::AttributeInfo, byte_reader::ByteReader,
+    attribute::AttributeInfo, byte_reader::ByteReader,
     constant_pool::ConstantPoolContainer, utils::to_u16,
 };
-use crate::access_flags::Flags;
+use crate::flags::{Flags, MethodAccessFlags};
 
 /// Represents a method on a class or interface
 pub struct MethodInfo {
