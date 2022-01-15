@@ -266,6 +266,7 @@
 <span id="264">264</span>
 <span id="265">265</span>
 <span id="266">266</span>
+<span id="267">267</span>
 </pre><pre class="rust">
 <span class="doccomment">//! Java Virtual Machine language disassembler</span>
 <span class="doccomment">//!</span>
@@ -274,7 +275,8 @@
 <span class="doccomment">//! Obviously it is not a direct replacement as this module has been written for educational purposes.</span>
 <span class="doccomment">//! However, the disassembler should function well enough that it can theoretically be used as a drop-in replacement for [`javap`](https://docs.oracle.com/javase/7/docs/technotes/tools/windows/javap.html).</span>
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">byte_reader::ByteReader</span>, <span class="ident">class_file::ClassFile</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">byte_reader::ByteReader</span>};
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::classfile::ClassFile</span>;
 
 <span class="doccomment">/// Controls which access level shows up in the output</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">DisassemblerVisibility</span> {
@@ -390,71 +392,71 @@
 
         <span class="kw">for</span> <span class="ident">entry</span> <span class="kw">in</span> <span class="ident">class</span>.<span class="ident">constant_pool</span>.<span class="ident">values</span>() {
             <span class="kw">match</span> <span class="ident">entry</span>.<span class="ident">tag</span> {
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantUtf8</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantUtf8</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_utf8</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = Utf8&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantInteger</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantInteger</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_integer</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = Integer&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantFloat</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantFloat</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_float</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = Float&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantLong</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantLong</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_long</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = Long&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantDouble</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantDouble</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_double</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = Double&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantClass</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantClass</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_class</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = Class&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantString</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantString</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_string</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = String&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantFieldRef</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantFieldRef</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_field_ref</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = FieldRef&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantMethodRef</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantMethodRef</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_method_ref</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = MethodRef&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantInterfaceMethodRef</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantInterfaceMethodRef</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_interface_method_ref</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = InterfaceMethodRef&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantNameAndType</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantNameAndType</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_name_and_type</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = ConstantNameAndType&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantMethodHandle</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantMethodHandle</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_method_handle</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = MethodHandle&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantMethodType</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantMethodType</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_method_type</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = MethodType&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantDynamic</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantDynamic</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_dynamic</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = Dynamic&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantInvokeDynamic</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantInvokeDynamic</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_invoke_dynamic</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = InvokeDynamic&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantModule</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantModule</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_module</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = Module&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
-                <span class="kw">crate</span><span class="ident">::constant_pool::Tag::ConstantPackage</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">crate</span><span class="ident">::classfile::Tag::ConstantPackage</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">concrete</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">try_cast_into_package</span>().<span class="ident">unwrap</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;#{} = Package&quot;</span>, <span class="ident">concrete</span>.<span class="ident">constant_pool_index</span>);
                 }
