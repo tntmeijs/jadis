@@ -31,6 +31,11 @@
 //! | -V, --version | Version information |
 //! | -v, --verbose | Print additional information |
 
+use clap::{App, AppSettings, Arg};
+
+use byte_reader::ByteReader;
+use disassembler::{DisassemberConfig, Disassembler, DisassemblerVisibility};
+
 mod access_flags;
 mod attribute;
 mod byte_reader;
@@ -40,10 +45,6 @@ mod disassembler;
 mod field;
 mod method;
 mod utils;
-
-use byte_reader::ByteReader;
-use clap::{App, AppSettings, Arg};
-use disassembler::{DisassemberConfig, Disassembler, DisassemblerVisibility};
 
 /// Application entry point
 fn main() {

@@ -2,6 +2,14 @@
 
 use crate::utils::bitmask_matches;
 
+/// Base trait for all access flag types
+pub trait AccessFlags {
+    type AccessFlagType;
+
+    /// Fetch all active access flags from a value
+    fn from_u16(value: u16) -> Vec<Self::AccessFlagType>;
+}
+
 /// Class access and property flags
 // TODO: remove debug directive
 #[derive(Debug, PartialEq)]
@@ -34,9 +42,10 @@ pub enum ClassAccessFlags {
     AccModule,
 }
 
-impl ClassAccessFlags {
-    /// Fetch all active access flags from a value
-    pub fn from_u16(value: u16) -> Vec<Self> {
+impl AccessFlags for ClassAccessFlags {
+    type AccessFlagType = ClassAccessFlags;
+
+    fn from_u16(value: u16) -> Vec<Self::AccessFlagType> {
         let mut flags = vec![];
 
         if bitmask_matches(value, 0x0001) {
@@ -112,9 +121,10 @@ pub enum FieldAccessFlags {
     AccEnum,
 }
 
-impl FieldAccessFlags {
-    /// Fetch all active access flags from a value
-    pub fn from_u16(value: u16) -> Vec<Self> {
+impl AccessFlags for FieldAccessFlags {
+    type AccessFlagType = FieldAccessFlags;
+
+    fn from_u16(value: u16) -> Vec<Self::AccessFlagType> {
         let mut flags = vec![];
 
         if bitmask_matches(value, 0x0001) {
@@ -199,9 +209,10 @@ pub enum MethodAccessFlags {
     AccSynthetic,
 }
 
-impl MethodAccessFlags {
-    /// Fetch all active access flags from a value
-    pub fn from_u16(value: u16) -> Vec<Self> {
+impl AccessFlags for MethodAccessFlags {
+    type AccessFlagType = MethodAccessFlags;
+
+    fn from_u16(value: u16) -> Vec<Self::AccessFlagType> {
         let mut flags = vec![];
 
         if bitmask_matches(value, 0x0001) {
@@ -257,12 +268,100 @@ impl MethodAccessFlags {
     }
 }
 
+/// Nested class access and property flags
+// TODO: remove debug directive
+#[derive(Debug, PartialEq)]
+pub enum NestedClassAccessFlags {
+    /// Marked or implicitly public in source
+    AccPublic,
+
+    /// Marked private in source
+    AccPrivate,
+
+    /// Marked protected in source
+    AccProtected,
+
+    /// Marked or implicitly static in source
+    AccStatic,
+
+    /// Marked or implicitly final in source
+    AccFinal,
+
+    /// Was an interface in source
+    AccInterface,
+
+    /// Marked or implicitly abstract in source.
+    AccAbstract,
+
+    /// Declared synthetic; not present in the source code
+    AccSynthetic,
+
+    /// Declared as an annotation interface
+    AccAnnotation,
+
+    /// Declared as an enum class
+    AccEnum,
+}
+
+impl AccessFlags for NestedClassAccessFlags {
+    type AccessFlagType = NestedClassAccessFlags;
+
+    fn from_u16(value: u16) -> Vec<Self::AccessFlagType> {
+        let mut flags = vec![];
+
+        if bitmask_matches(value, 0x0001) {
+            flags.push(Self::AccPublic);
+        }
+
+        if bitmask_matches(value, 0x0002) {
+            flags.push(Self::AccPrivate);
+        }
+
+        if bitmask_matches(value, 0x0004) {
+            flags.push(Self::AccProtected);
+        }
+
+        if bitmask_matches(value, 0x0008) {
+            flags.push(Self::AccStatic);
+        }
+
+        if bitmask_matches(value, 0x0010) {
+            flags.push(Self::AccFinal);
+        }
+
+        if bitmask_matches(value, 0x0200) {
+            flags.push(Self::AccInterface);
+        }
+
+        if bitmask_matches(value, 0x0400) {
+            flags.push(Self::AccAbstract);
+        }
+
+        if bitmask_matches(value, 0x1000) {
+            flags.push(Self::AccSynthetic);
+        }
+
+        if bitmask_matches(value, 0x2000) {
+            flags.push(Self::AccAnnotation);
+        }
+
+        if bitmask_matches(value, 0x4000) {
+            flags.push(Self::AccEnum);
+        }
+
+        assert!(flags.len() > 0, "Bitmask does not specify ANY access flags");
+        flags
+    }
+}
+
 mod tests {
+    use crate::access_flags::{AccessFlags, ClassAccessFlags, FieldAccessFlags, MethodAccessFlags, NestedClassAccessFlags};
+
     #[test]
     fn test_class_access_flag_public() {
         assert_eq!(
-            crate::access_flags::ClassAccessFlags::from_u16(0x0001)[0],
-            crate::access_flags::ClassAccessFlags::AccPublic,
+            ClassAccessFlags::from_u16(0x0001)[0],
+            ClassAccessFlags::AccPublic,
             "Incorrect access flag returned"
         );
     }
@@ -270,8 +369,8 @@ mod tests {
     #[test]
     fn test_class_access_flag_final() {
         assert_eq!(
-            crate::access_flags::ClassAccessFlags::from_u16(0x0010)[0],
-            crate::access_flags::ClassAccessFlags::AccFinal,
+            ClassAccessFlags::from_u16(0x0010)[0],
+            ClassAccessFlags::AccFinal,
             "Incorrect access flag returned"
         );
     }
@@ -279,8 +378,8 @@ mod tests {
     #[test]
     fn test_class_access_flag_super() {
         assert_eq!(
-            crate::access_flags::ClassAccessFlags::from_u16(0x0020)[0],
-            crate::access_flags::ClassAccessFlags::AccSuper,
+            ClassAccessFlags::from_u16(0x0020)[0],
+            ClassAccessFlags::AccSuper,
             "Incorrect access flag returned"
         );
     }
@@ -288,8 +387,8 @@ mod tests {
     #[test]
     fn test_class_access_flag_interface() {
         assert_eq!(
-            crate::access_flags::ClassAccessFlags::from_u16(0x0200)[0],
-            crate::access_flags::ClassAccessFlags::AccInterface,
+            ClassAccessFlags::from_u16(0x0200)[0],
+            ClassAccessFlags::AccInterface,
             "Incorrect access flag returned"
         );
     }
@@ -297,8 +396,8 @@ mod tests {
     #[test]
     fn test_class_access_flag_abstract() {
         assert_eq!(
-            crate::access_flags::ClassAccessFlags::from_u16(0x0400)[0],
-            crate::access_flags::ClassAccessFlags::AccAbstract,
+            ClassAccessFlags::from_u16(0x0400)[0],
+            ClassAccessFlags::AccAbstract,
             "Incorrect access flag returned"
         );
     }
@@ -306,8 +405,8 @@ mod tests {
     #[test]
     fn test_class_access_flag_synthetic() {
         assert_eq!(
-            crate::access_flags::ClassAccessFlags::from_u16(0x1000)[0],
-            crate::access_flags::ClassAccessFlags::AccSynthetic,
+            ClassAccessFlags::from_u16(0x1000)[0],
+            ClassAccessFlags::AccSynthetic,
             "Incorrect access flag returned"
         );
     }
@@ -315,8 +414,8 @@ mod tests {
     #[test]
     fn test_class_access_flag_annotation() {
         assert_eq!(
-            crate::access_flags::ClassAccessFlags::from_u16(0x2000)[0],
-            crate::access_flags::ClassAccessFlags::AccAnnotation,
+            ClassAccessFlags::from_u16(0x2000)[0],
+            ClassAccessFlags::AccAnnotation,
             "Incorrect access flag returned"
         );
     }
@@ -324,8 +423,8 @@ mod tests {
     #[test]
     fn test_class_access_flag_enum() {
         assert_eq!(
-            crate::access_flags::ClassAccessFlags::from_u16(0x4000)[0],
-            crate::access_flags::ClassAccessFlags::AccEnum,
+            ClassAccessFlags::from_u16(0x4000)[0],
+            ClassAccessFlags::AccEnum,
             "Incorrect access flag returned"
         );
     }
@@ -333,8 +432,8 @@ mod tests {
     #[test]
     fn test_class_access_flag_module() {
         assert_eq!(
-            crate::access_flags::ClassAccessFlags::from_u16(0x8000)[0],
-            crate::access_flags::ClassAccessFlags::AccModule,
+            ClassAccessFlags::from_u16(0x8000)[0],
+            ClassAccessFlags::AccModule,
             "Incorrect access flag returned"
         );
     }
@@ -342,11 +441,11 @@ mod tests {
     #[test]
     fn test_class_access_multiple_flags() {
         assert_eq!(
-            crate::access_flags::ClassAccessFlags::from_u16(0x4420),
+            ClassAccessFlags::from_u16(0x4420),
             vec![
-                crate::access_flags::ClassAccessFlags::AccSuper,
-                crate::access_flags::ClassAccessFlags::AccAbstract,
-                crate::access_flags::ClassAccessFlags::AccEnum
+                ClassAccessFlags::AccSuper,
+                ClassAccessFlags::AccAbstract,
+                ClassAccessFlags::AccEnum
             ],
             "Incorrect access flags returned"
         );
@@ -355,8 +454,8 @@ mod tests {
     #[test]
     fn test_field_access_flag_public() {
         assert_eq!(
-            crate::access_flags::FieldAccessFlags::from_u16(0x0001)[0],
-            crate::access_flags::FieldAccessFlags::AccPublic,
+            FieldAccessFlags::from_u16(0x0001)[0],
+            FieldAccessFlags::AccPublic,
             "Incorrect access flag returned"
         );
     }
@@ -364,8 +463,8 @@ mod tests {
     #[test]
     fn test_field_access_flag_final() {
         assert_eq!(
-            crate::access_flags::FieldAccessFlags::from_u16(0x0002)[0],
-            crate::access_flags::FieldAccessFlags::AccPrivate,
+            FieldAccessFlags::from_u16(0x0002)[0],
+            FieldAccessFlags::AccPrivate,
             "Incorrect access flag returned"
         );
     }
@@ -373,8 +472,8 @@ mod tests {
     #[test]
     fn test_field_access_flag_super() {
         assert_eq!(
-            crate::access_flags::FieldAccessFlags::from_u16(0x0004)[0],
-            crate::access_flags::FieldAccessFlags::AccProtected,
+            FieldAccessFlags::from_u16(0x0004)[0],
+            FieldAccessFlags::AccProtected,
             "Incorrect access flag returned"
         );
     }
@@ -382,8 +481,8 @@ mod tests {
     #[test]
     fn test_field_access_flag_interface() {
         assert_eq!(
-            crate::access_flags::FieldAccessFlags::from_u16(0x0008)[0],
-            crate::access_flags::FieldAccessFlags::AccStatic,
+            FieldAccessFlags::from_u16(0x0008)[0],
+            FieldAccessFlags::AccStatic,
             "Incorrect access flag returned"
         );
     }
@@ -391,8 +490,8 @@ mod tests {
     #[test]
     fn test_field_access_flag_abstract() {
         assert_eq!(
-            crate::access_flags::FieldAccessFlags::from_u16(0x0010)[0],
-            crate::access_flags::FieldAccessFlags::AccFinal,
+            FieldAccessFlags::from_u16(0x0010)[0],
+            FieldAccessFlags::AccFinal,
             "Incorrect access flag returned"
         );
     }
@@ -400,8 +499,8 @@ mod tests {
     #[test]
     fn test_field_access_flag_synthetic() {
         assert_eq!(
-            crate::access_flags::FieldAccessFlags::from_u16(0x0040)[0],
-            crate::access_flags::FieldAccessFlags::AccVolatile,
+            FieldAccessFlags::from_u16(0x0040)[0],
+            FieldAccessFlags::AccVolatile,
             "Incorrect access flag returned"
         );
     }
@@ -409,8 +508,8 @@ mod tests {
     #[test]
     fn test_field_access_flag_annotation() {
         assert_eq!(
-            crate::access_flags::FieldAccessFlags::from_u16(0x0080)[0],
-            crate::access_flags::FieldAccessFlags::AccTransient,
+            FieldAccessFlags::from_u16(0x0080)[0],
+            FieldAccessFlags::AccTransient,
             "Incorrect access flag returned"
         );
     }
@@ -418,8 +517,8 @@ mod tests {
     #[test]
     fn test_field_access_flag_enum() {
         assert_eq!(
-            crate::access_flags::FieldAccessFlags::from_u16(0x1000)[0],
-            crate::access_flags::FieldAccessFlags::AccSynthetic,
+            FieldAccessFlags::from_u16(0x1000)[0],
+            FieldAccessFlags::AccSynthetic,
             "Incorrect access flag returned"
         );
     }
@@ -427,8 +526,8 @@ mod tests {
     #[test]
     fn test_field_access_flag_module() {
         assert_eq!(
-            crate::access_flags::FieldAccessFlags::from_u16(0x4000)[0],
-            crate::access_flags::FieldAccessFlags::AccEnum,
+            FieldAccessFlags::from_u16(0x4000)[0],
+            FieldAccessFlags::AccEnum,
             "Incorrect access flag returned"
         );
     }
@@ -436,12 +535,12 @@ mod tests {
     #[test]
     fn test_field_access_multiple_flags() {
         assert_eq!(
-            crate::access_flags::FieldAccessFlags::from_u16(0x5082),
+            FieldAccessFlags::from_u16(0x5082),
             vec![
-                crate::access_flags::FieldAccessFlags::AccPrivate,
-                crate::access_flags::FieldAccessFlags::AccTransient,
-                crate::access_flags::FieldAccessFlags::AccSynthetic,
-                crate::access_flags::FieldAccessFlags::AccEnum
+                FieldAccessFlags::AccPrivate,
+                FieldAccessFlags::AccTransient,
+                FieldAccessFlags::AccSynthetic,
+                FieldAccessFlags::AccEnum
             ],
             "Incorrect access flags returned"
         );
@@ -450,8 +549,8 @@ mod tests {
     #[test]
     fn test_method_access_flag_public() {
         assert_eq!(
-            crate::access_flags::MethodAccessFlags::from_u16(0x0001)[0],
-            crate::access_flags::MethodAccessFlags::AccPublic,
+            MethodAccessFlags::from_u16(0x0001)[0],
+            MethodAccessFlags::AccPublic,
             "Incorrect access flag returned"
         );
     }
@@ -459,8 +558,8 @@ mod tests {
     #[test]
     fn test_method_access_flag_private() {
         assert_eq!(
-            crate::access_flags::MethodAccessFlags::from_u16(0x0002)[0],
-            crate::access_flags::MethodAccessFlags::AccPrivate,
+            MethodAccessFlags::from_u16(0x0002)[0],
+            MethodAccessFlags::AccPrivate,
             "Incorrect access flag returned"
         );
     }
@@ -468,8 +567,8 @@ mod tests {
     #[test]
     fn test_method_access_flag_protected() {
         assert_eq!(
-            crate::access_flags::MethodAccessFlags::from_u16(0x0004)[0],
-            crate::access_flags::MethodAccessFlags::AccProtected,
+            MethodAccessFlags::from_u16(0x0004)[0],
+            MethodAccessFlags::AccProtected,
             "Incorrect access flag returned"
         );
     }
@@ -477,8 +576,8 @@ mod tests {
     #[test]
     fn test_method_access_flag_static() {
         assert_eq!(
-            crate::access_flags::MethodAccessFlags::from_u16(0x0008)[0],
-            crate::access_flags::MethodAccessFlags::AccStatic,
+            MethodAccessFlags::from_u16(0x0008)[0],
+            MethodAccessFlags::AccStatic,
             "Incorrect access flag returned"
         );
     }
@@ -486,8 +585,8 @@ mod tests {
     #[test]
     fn test_method_access_flag_final() {
         assert_eq!(
-            crate::access_flags::MethodAccessFlags::from_u16(0x0010)[0],
-            crate::access_flags::MethodAccessFlags::AccFinal,
+            MethodAccessFlags::from_u16(0x0010)[0],
+            MethodAccessFlags::AccFinal,
             "Incorrect access flag returned"
         );
     }
@@ -495,8 +594,8 @@ mod tests {
     #[test]
     fn test_method_access_flag_synchronized() {
         assert_eq!(
-            crate::access_flags::MethodAccessFlags::from_u16(0x0020)[0],
-            crate::access_flags::MethodAccessFlags::AccSynchronized,
+            MethodAccessFlags::from_u16(0x0020)[0],
+            MethodAccessFlags::AccSynchronized,
             "Incorrect access flag returned"
         );
     }
@@ -504,8 +603,8 @@ mod tests {
     #[test]
     fn test_method_access_flag_bridge() {
         assert_eq!(
-            crate::access_flags::MethodAccessFlags::from_u16(0x0040)[0],
-            crate::access_flags::MethodAccessFlags::AccBridge,
+            MethodAccessFlags::from_u16(0x0040)[0],
+            MethodAccessFlags::AccBridge,
             "Incorrect access flag returned"
         );
     }
@@ -513,8 +612,8 @@ mod tests {
     #[test]
     fn test_method_access_flag_varargs() {
         assert_eq!(
-            crate::access_flags::MethodAccessFlags::from_u16(0x0080)[0],
-            crate::access_flags::MethodAccessFlags::AccVarArgs,
+            MethodAccessFlags::from_u16(0x0080)[0],
+            MethodAccessFlags::AccVarArgs,
             "Incorrect access flag returned"
         );
     }
@@ -522,8 +621,8 @@ mod tests {
     #[test]
     fn test_method_access_flag_native() {
         assert_eq!(
-            crate::access_flags::MethodAccessFlags::from_u16(0x0100)[0],
-            crate::access_flags::MethodAccessFlags::AccNative,
+            MethodAccessFlags::from_u16(0x0100)[0],
+            MethodAccessFlags::AccNative,
             "Incorrect access flag returned"
         );
     }
@@ -531,8 +630,8 @@ mod tests {
     #[test]
     fn test_method_access_flag_abstract() {
         assert_eq!(
-            crate::access_flags::MethodAccessFlags::from_u16(0x0400)[0],
-            crate::access_flags::MethodAccessFlags::AccAbstract,
+            MethodAccessFlags::from_u16(0x0400)[0],
+            MethodAccessFlags::AccAbstract,
             "Incorrect access flag returned"
         );
     }
@@ -540,8 +639,8 @@ mod tests {
     #[test]
     fn test_method_access_flag_strict() {
         assert_eq!(
-            crate::access_flags::MethodAccessFlags::from_u16(0x0800)[0],
-            crate::access_flags::MethodAccessFlags::AccStrict,
+            MethodAccessFlags::from_u16(0x0800)[0],
+            MethodAccessFlags::AccStrict,
             "Incorrect access flag returned"
         );
     }
@@ -549,8 +648,8 @@ mod tests {
     #[test]
     fn test_method_access_flag_synthetic() {
         assert_eq!(
-            crate::access_flags::MethodAccessFlags::from_u16(0x1000)[0],
-            crate::access_flags::MethodAccessFlags::AccSynthetic,
+            MethodAccessFlags::from_u16(0x1000)[0],
+            MethodAccessFlags::AccSynthetic,
             "Incorrect access flag returned"
         );
     }
@@ -558,15 +657,124 @@ mod tests {
     #[test]
     fn test_method_access_multiple_flags() {
         assert_eq!(
-            crate::access_flags::MethodAccessFlags::from_u16(0x1533),
+            MethodAccessFlags::from_u16(0x1533),
             vec![
-                crate::access_flags::MethodAccessFlags::AccPublic,
-                crate::access_flags::MethodAccessFlags::AccPrivate,
-                crate::access_flags::MethodAccessFlags::AccFinal,
-                crate::access_flags::MethodAccessFlags::AccSynchronized,
-                crate::access_flags::MethodAccessFlags::AccNative,
-                crate::access_flags::MethodAccessFlags::AccAbstract,
-                crate::access_flags::MethodAccessFlags::AccSynthetic,
+                MethodAccessFlags::AccPublic,
+                MethodAccessFlags::AccPrivate,
+                MethodAccessFlags::AccFinal,
+                MethodAccessFlags::AccSynchronized,
+                MethodAccessFlags::AccNative,
+                MethodAccessFlags::AccAbstract,
+                MethodAccessFlags::AccSynthetic,
+            ],
+            "Incorrect access flags returned"
+        );
+    }
+
+    #[test]
+    fn test_nested_class_access_flag_public() {
+        assert_eq!(
+            NestedClassAccessFlags::from_u16(0x0001)[0],
+            NestedClassAccessFlags::AccPublic,
+            "Incorrect access flag returned"
+        );
+    }
+
+    #[test]
+    fn test_nested_class_access_flag_private() {
+        assert_eq!(
+            NestedClassAccessFlags::from_u16(0x0002)[0],
+            NestedClassAccessFlags::AccPrivate,
+            "Incorrect access flag returned"
+        );
+    }
+
+    #[test]
+    fn test_nested_class_access_flag_protected() {
+        assert_eq!(
+            NestedClassAccessFlags::from_u16(0x0004)[0],
+            NestedClassAccessFlags::AccProtected,
+            "Incorrect access flag returned"
+        );
+    }
+
+    #[test]
+    fn test_nested_class_access_flag_static() {
+        assert_eq!(
+            NestedClassAccessFlags::from_u16(0x0008)[0],
+            NestedClassAccessFlags::AccStatic,
+            "Incorrect access flag returned"
+        );
+    }
+
+    #[test]
+    fn test_nested_class_access_flag_final() {
+        assert_eq!(
+            NestedClassAccessFlags::from_u16(0x0010)[0],
+            NestedClassAccessFlags::AccFinal,
+            "Incorrect access flag returned"
+        );
+    }
+
+    #[test]
+    fn test_nested_class_access_flag_synchronized() {
+        assert_eq!(
+            NestedClassAccessFlags::from_u16(0x0200)[0],
+            NestedClassAccessFlags::AccInterface,
+            "Incorrect access flag returned"
+        );
+    }
+
+    #[test]
+    fn test_nested_class_access_flag_bridge() {
+        assert_eq!(
+            NestedClassAccessFlags::from_u16(0x0400)[0],
+            NestedClassAccessFlags::AccAbstract,
+            "Incorrect access flag returned"
+        );
+    }
+
+    #[test]
+    fn test_nested_class_access_flag_varargs() {
+        assert_eq!(
+            NestedClassAccessFlags::from_u16(0x1000)[0],
+            NestedClassAccessFlags::AccSynthetic,
+            "Incorrect access flag returned"
+        );
+    }
+
+    #[test]
+    fn test_nested_class_access_flag_native() {
+        assert_eq!(
+            NestedClassAccessFlags::from_u16(0x2000)[0],
+            NestedClassAccessFlags::AccAnnotation,
+            "Incorrect access flag returned"
+        );
+    }
+
+    #[test]
+    fn test_nested_class_access_flag_abstract() {
+        assert_eq!(
+            NestedClassAccessFlags::from_u16(0x4000)[0],
+            NestedClassAccessFlags::AccEnum,
+            "Incorrect access flag returned"
+        );
+    }
+
+    #[test]
+    fn test_nested_class_access_multiple_flags() {
+        assert_eq!(
+            NestedClassAccessFlags::from_u16(0x7617),
+            vec![
+                NestedClassAccessFlags::AccPublic,
+                NestedClassAccessFlags::AccPrivate,
+                NestedClassAccessFlags::AccProtected,
+                NestedClassAccessFlags::AccFinal,
+                NestedClassAccessFlags::AccInterface,
+                NestedClassAccessFlags::AccAbstract,
+                NestedClassAccessFlags::AccSynthetic,
+                NestedClassAccessFlags::AccAnnotation,
+                NestedClassAccessFlags::AccEnum,
             ],
             "Incorrect access flags returned"
         );

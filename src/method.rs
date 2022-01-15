@@ -6,6 +6,7 @@ use crate::{
     access_flags::MethodAccessFlags, attribute::AttributeInfo, byte_reader::ByteReader,
     constant_pool::ConstantPoolContainer, utils::to_u16,
 };
+use crate::access_flags::AccessFlags;
 
 /// Represents a method on a class or interface
 pub struct MethodInfo {

@@ -9,6 +9,7 @@ use crate::{
     constant_pool::ConstantPoolContainer,
     utils::{to_u16, to_u32},
 };
+use crate::access_flags::{AccessFlags, NestedClassAccessFlags};
 
 /// Base trait to store specialised attributes
 trait Attribute {
@@ -579,11 +580,28 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeInnerClasses {
-        todo!();
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.6
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeInnerClasses {}
+        let number_of_classes = to_u16(&reader.read_n_bytes(2));
+        let mut classes = vec![];
+
+        for _ in 0..number_of_classes {
+            let inner_class_info_index = to_u16(&reader.read_n_bytes(2));
+            let outer_class_info_index = to_u16(&reader.read_n_bytes(2));
+            let inner_name_index = to_u16(&reader.read_n_bytes(2));
+            let inner_class_access_flags = NestedClassAccessFlags::from_u16(to_u16(&reader.read_n_bytes(2)));
+
+            classes.push(InnerClassEntry {
+                inner_class_info_index,
+                outer_class_info_index,
+                inner_name_index,
+                inner_class_access_flags,
+            })
+        }
+
+        AttributeInnerClasses {
+            attribute_name_index,
+            attribute_length,
+            classes,
+        }
     }
 
     /// Read the data blob as an enclosing method attribute
@@ -838,7 +856,7 @@ impl AttributeInfo {
         AttributeBootstrapMethods {
             attribute_name_index,
             attribute_length,
-            bootstrap_methods
+            bootstrap_methods,
         }
     }
 
@@ -1040,7 +1058,22 @@ impl Attribute for AttributeExceptions {
     }
 }
 
-pub struct AttributeInnerClasses {}
+/// Represents a class entry in the inner classes attribute
+struct InnerClassEntry {
+    inner_class_info_index: u16,
+    outer_class_info_index: u16,
+    inner_name_index: u16,
+    inner_class_access_flags: Vec<NestedClassAccessFlags>,
+}
+
+/// Used inside a class file structure to provide information about the class or interface
+///
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.6
+pub struct AttributeInnerClasses {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    classes: Vec<InnerClassEntry>,
+}
 
 impl Attribute for AttributeInnerClasses {
     fn as_concrete_type(&self) -> &dyn Any {
