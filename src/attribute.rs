@@ -820,11 +820,26 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeBootstrapMethods {
-        todo!();
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.23
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeBootstrapMethods {}
+        let num_bootstrap_methods = to_u16(&reader.read_n_bytes(2));
+
+        let mut bootstrap_methods = vec![];
+        for _ in 0..num_bootstrap_methods {
+            let bootstrap_method_ref = to_u16(&reader.read_n_bytes(2));
+            let num_bootstrap_arguments = to_u16(&reader.read_n_bytes(2));
+
+            let mut bootstrap_arguments = vec![];
+            for _ in 0..num_bootstrap_arguments {
+                bootstrap_arguments.push(to_u16(&reader.read_n_bytes(2)));
+            }
+
+            bootstrap_methods.push(BootstrapMethodEntry { bootstrap_method_ref, bootstrap_arguments });
+        }
+
+        AttributeBootstrapMethods {
+            attribute_name_index,
+            attribute_length,
+            bootstrap_methods
+        }
     }
 
     /// Read the data blob as a method parameters attribute
@@ -1220,7 +1235,22 @@ impl Attribute for AttributeAnnotationDefault {
     }
 }
 
-pub struct AttributeBootstrapMethods {}
+/// Represents a bootstrap method information entry
+struct BootstrapMethodEntry {
+    /// Index into the constant pool pointing to a method handle information structure
+    bootstrap_method_ref: u16,
+
+    /// Indices into the constant pool that point to bootstrap method arguments
+    bootstrap_arguments: Vec<u16>,
+}
+
+/// Records bootstrap methods used to produce dynamically-computed constants and dynamically-computed call sites
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.23
+pub struct AttributeBootstrapMethods {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    bootstrap_methods: Vec<BootstrapMethodEntry>,
+}
 
 impl Attribute for AttributeBootstrapMethods {
     fn as_concrete_type(&self) -> &dyn Any {
