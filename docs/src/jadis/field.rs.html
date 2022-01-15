@@ -54,6 +54,7 @@
 <span id="52">52</span>
 <span id="53">53</span>
 <span id="54">54</span>
+<span id="55">55</span>
 </pre><pre class="rust">
 <span class="doccomment">//! Provides functionality to simplify working with field structures</span>
 <span class="doccomment">//!</span>
@@ -63,6 +64,7 @@
     <span class="ident">access_flags::FieldAccessFlags</span>, <span class="ident">attribute::AttributeInfo</span>, <span class="ident">byte_reader::ByteReader</span>,
     <span class="ident">constant_pool::ConstantPoolContainer</span>, <span class="ident">utils::to_u16</span>,
 };
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::access_flags::Flags</span>;
 
 <span class="doccomment">/// Represents a field on a class or interface</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FieldInfo</span> {

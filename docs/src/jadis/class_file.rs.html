@@ -256,7 +256,7 @@
 <span class="doccomment">//! This module is used to add class format parsing functionality to Jadis</span>
 <span class="doccomment">//! Do note that the actual file IO is not handled by this module</span>
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::access_flags::ClassAccessFlags</span>;
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::access_flags</span>::{<span class="ident">Flags</span>, <span class="ident">ClassAccessFlags</span>};
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::attribute::AttributeInfo</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::byte_reader::ByteReader</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::constant_pool</span>::{<span class="ident">ConstantClassInfo</span>, <span class="ident">ConstantPoolContainer</span>, <span class="ident">ConstantPoolInfo</span>, <span class="ident">Tag</span>};
