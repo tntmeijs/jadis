@@ -723,14 +723,14 @@ impl AttributeInfo {
                 length,
                 name_index,
                 descriptor_index,
-                index
+                index,
             });
         }
 
         AttributeLocalVariableTable {
             attribute_name_index,
             attribute_length,
-            local_variable_table
+            local_variable_table,
         }
     }
 
@@ -740,11 +740,29 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeLocalVariableTypeTable {
-        todo!();
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.14
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeLocalVariableTypeTable {}
+        let mut local_variable_type_table = vec![];
+        let local_variable_type_table_length = to_u16(&reader.read_n_bytes(2));
+        for _ in 0..local_variable_type_table_length {
+            let start_pc = to_u16(&reader.read_n_bytes(2));
+            let length = to_u16(&reader.read_n_bytes(2));
+            let name_index = to_u16(&reader.read_n_bytes(2));
+            let signature_index = to_u16(&reader.read_n_bytes(2));
+            let index = to_u16(&reader.read_n_bytes(2));
+
+            local_variable_type_table.push(LocalVariableTypeTableEntry{
+                start_pc,
+                length,
+                name_index,
+                signature_index,
+                index
+            });
+        }
+
+        AttributeLocalVariableTypeTable {
+            attribute_name_index,
+            attribute_length,
+            local_variable_type_table
+        }
     }
 
     /// Read the data blob as a deprecated attribute
@@ -1365,7 +1383,26 @@ impl Attribute for AttributeLocalVariableTable {
     }
 }
 
-pub struct AttributeLocalVariableTypeTable {}
+/// Indicates a range of code array offsets within which a local variable has a value, and indicates
+/// the index into the local variable array of the current frame at which that local variable can be
+/// found
+struct LocalVariableTypeTableEntry {
+    start_pc: u16,
+    length: u16,
+    name_index: u16,
+    signature_index: u16,
+    index: u16,
+}
+
+/// May be used by debuggers to determine the value of a given local variable during the execution
+/// of a method
+///
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.14
+pub struct AttributeLocalVariableTypeTable {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    local_variable_type_table: Vec<LocalVariableTypeTableEntry>,
+}
 
 impl Attribute for AttributeLocalVariableTypeTable {
     fn as_concrete_type(&self) -> &dyn Any {
