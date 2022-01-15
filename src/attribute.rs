@@ -962,10 +962,10 @@ impl AttributeInfo {
                 provides_with_index.push(to_u16(&reader.read_n_bytes(2)));
             }
 
-            provides.push(ModuleProvidesEntry{
+            provides.push(ModuleProvidesEntry {
                 provides_index,
                 provides_with_count,
-                provides_with_index
+                provides_with_index,
             });
         }
 
@@ -979,7 +979,7 @@ impl AttributeInfo {
             exports,
             opens,
             uses_index,
-            provides
+            provides,
         }
     }
 
@@ -989,11 +989,17 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeModulePackages {
-        todo!();
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.26
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeModulePackages {}
+        let mut package_index = vec![];
+        let package_count = to_u16(&reader.read_n_bytes(2));
+        for _ in 0..package_count {
+            package_index.push(to_u16(&reader.read_n_bytes(2)));
+        }
+
+        AttributeModulePackages {
+            attribute_name_index,
+            attribute_length,
+            package_index
+        }
     }
 
     /// Read the data blob as a module main class attribute
@@ -1465,7 +1471,19 @@ impl Attribute for AttributeModule {
     }
 }
 
-pub struct AttributeModulePackages {}
+/// The ModulePackages attribute indicates all the packages of a module that are exported or opened
+/// by the Module attribute, as well as all the packages of the service implementations recorded in
+/// the Module attribute
+///
+/// The ModulePackages attribute may also indicate packages in the module that are neither exported
+/// nor opened nor contain service implementations
+///
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.26
+pub struct AttributeModulePackages {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    package_index: Vec<u16>,
+}
 
 impl Attribute for AttributeModulePackages {
     fn as_concrete_type(&self) -> &dyn Any {
