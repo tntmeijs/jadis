@@ -6,7 +6,7 @@ use crate::{
     access_flags::FieldAccessFlags, attribute::AttributeInfo, byte_reader::ByteReader,
     constant_pool::ConstantPoolContainer, utils::to_u16,
 };
-use crate::access_flags::AccessFlags;
+use crate::access_flags::Flags;
 
 /// Represents a field on a class or interface
 pub struct FieldInfo {

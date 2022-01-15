@@ -9,7 +9,7 @@ use crate::{
     constant_pool::ConstantPoolContainer,
     utils::{to_u16, to_u32},
 };
-use crate::access_flags::{AccessFlags, MethodParameterAccessFlags, NestedClassAccessFlags};
+use crate::access_flags::{Flags, MethodParameterAccessFlags, ModuleExportsFlags, ModuleFlags, ModuleOpensFlags, ModuleRequiresFlags, NestedClassAccessFlags};
 
 /// Base trait to store specialised attributes
 trait Attribute {
@@ -873,7 +873,7 @@ impl AttributeInfo {
             let name_index = to_u16(&reader.read_n_bytes(2));
             let access_flags = MethodParameterAccessFlags::from_u16(to_u16(&reader.read_n_bytes(2)));
 
-            parameters.push(MethodParameterEntry { name_index, access_flags })
+            parameters.push(MethodParameterEntry { name_index, access_flags });
         }
 
         AttributeMethodParameters {
@@ -889,11 +889,98 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeModule {
-        todo!();
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.25
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeModule {}
+        let module_name_index = to_u16(&reader.read_n_bytes(2));
+        let module_flags = ModuleFlags::from_u16(to_u16(&reader.read_n_bytes(2)));
+        let module_version_index = to_u16(&reader.read_n_bytes(2));
+
+        let mut requires = vec![];
+        let requires_count = to_u16(&reader.read_n_bytes(2));
+        for _ in 0..requires_count {
+            let requires_index = to_u16(&reader.read_n_bytes(2));
+            let requires_flags = ModuleRequiresFlags::from_u16(to_u16(&reader.read_n_bytes(2)));
+            let requires_version_index = to_u16(&reader.read_n_bytes(2));
+
+            requires.push(ModuleRequiresEntry {
+                requires_index,
+                requires_flags,
+                requires_version_index,
+            });
+        }
+
+        let mut exports = vec![];
+        let exports_count = to_u16(&reader.read_n_bytes(2));
+        for _ in 0..exports_count {
+            let exports_index = to_u16(&reader.read_n_bytes(2));
+            let exports_flags = ModuleExportsFlags::from_u16(to_u16(&reader.read_n_bytes(2)));
+
+            let mut exports_to_index = vec![];
+            let exports_to_count = to_u16(&reader.read_n_bytes(2));
+            for _ in 0..exports_to_count {
+                exports_to_index.push(to_u16(&reader.read_n_bytes(2)));
+            }
+
+            exports.push(ModuleExportsEntry {
+                exports_index,
+                exports_flags,
+                exports_to_index,
+            });
+        }
+
+        let mut opens = vec![];
+        let opens_count = to_u16(&reader.read_n_bytes(2));
+        for _ in 0..opens_count {
+            let opens_index = to_u16(&reader.read_n_bytes(2));
+            let opens_flags = ModuleOpensFlags::from_u16(to_u16(&reader.read_n_bytes(2)));
+
+            let mut opens_to_index = vec![];
+            let opens_to_count = to_u16(&reader.read_n_bytes(2));
+            for _ in 0..opens_to_count {
+                opens_to_index.push(to_u16(&reader.read_n_bytes(2)));
+            }
+
+            opens.push(ModuleOpensEntry {
+                opens_index,
+                opens_flags,
+                opens_to_index,
+            });
+        }
+
+        let mut uses_index = vec![];
+        let uses_count = to_u16(&reader.read_n_bytes(2));
+        for _ in 0..uses_count {
+            uses_index.push(to_u16(&reader.read_n_bytes(2)));
+        }
+
+        let mut provides = vec![];
+        let mut provides_count = to_u16(&reader.read_n_bytes(2));
+        for _ in 0..provides_count {
+            let provides_index = to_u16(&reader.read_n_bytes(2));
+
+            let mut provides_with_index = vec![];
+            let mut provides_with_count = to_u16(&reader.read_n_bytes(2));
+            for _ in 0..provides_with_count {
+                provides_with_index.push(to_u16(&reader.read_n_bytes(2)));
+            }
+
+            provides.push(ModuleProvidesEntry{
+                provides_index,
+                provides_with_count,
+                provides_with_index
+            });
+        }
+
+        AttributeModule {
+            attribute_name_index,
+            attribute_length,
+            module_name_index,
+            module_flags,
+            module_version_index,
+            requires,
+            exports,
+            opens,
+            uses_index,
+            provides
+        }
     }
 
     /// Read the data blob as a module packages attribute
@@ -1325,7 +1412,52 @@ impl Attribute for AttributeMethodParameters {
     }
 }
 
-pub struct AttributeModule {}
+/// Specifies a dependence of the current module
+struct ModuleRequiresEntry {
+    requires_index: u16,
+    requires_flags: Vec<ModuleRequiresFlags>,
+    requires_version_index: u16,
+}
+
+/// Indicates the number of entries in the exports table
+struct ModuleExportsEntry {
+    exports_index: u16,
+    exports_flags: Vec<ModuleExportsFlags>,
+    exports_to_index: Vec<u16>,
+}
+
+/// Specifies a package opened by the current module, such that all types in the package, and all
+/// their members, may be accessed from outside the current module via the reflection libraries of
+/// the Java SE Platform, possibly from a limited set of "friend" modules.
+struct ModuleOpensEntry {
+    opens_index: u16,
+    opens_flags: Vec<ModuleOpensFlags>,
+    opens_to_index: Vec<u16>,
+}
+
+/// Represents a service implementation for a given service interface
+struct ModuleProvidesEntry {
+    provides_index: u16,
+    provides_with_count: u16,
+    provides_with_index: Vec<u16>,
+}
+
+/// The Module attribute indicates the modules required by a module; the packages exported and
+/// opened by a module; and the services used and provided by a module
+///
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.25
+pub struct AttributeModule {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    module_name_index: u16,
+    module_flags: Vec<ModuleFlags>,
+    module_version_index: u16,
+    requires: Vec<ModuleRequiresEntry>,
+    exports: Vec<ModuleExportsEntry>,
+    opens: Vec<ModuleOpensEntry>,
+    uses_index: Vec<u16>,
+    provides: Vec<ModuleProvidesEntry>,
+}
 
 impl Attribute for AttributeModule {
     fn as_concrete_type(&self) -> &dyn Any {

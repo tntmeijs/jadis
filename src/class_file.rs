@@ -3,7 +3,7 @@
 //! This module is used to add class format parsing functionality to Jadis
 //! Do note that the actual file IO is not handled by this module
 
-use crate::access_flags::{AccessFlags, ClassAccessFlags};
+use crate::access_flags::{Flags, ClassAccessFlags};
 use crate::attribute::AttributeInfo;
 use crate::byte_reader::ByteReader;
 use crate::constant_pool::{ConstantClassInfo, ConstantPoolContainer, ConstantPoolInfo, Tag};
