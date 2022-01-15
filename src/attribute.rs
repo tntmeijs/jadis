@@ -1028,7 +1028,7 @@ impl AttributeInfo {
         AttributeNestHost {
             attribute_name_index,
             attribute_length,
-            host_class_index
+            host_class_index,
         }
     }
 
@@ -1038,11 +1038,17 @@ impl AttributeInfo {
         attribute_name_index: u16,
         attribute_length: u32,
     ) -> AttributeNestMembers {
-        todo!();
-        // TODO: implement attribute: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.29
-        // Simply skip this attribute's data
-        reader.read_n_bytes(std::convert::TryInto::try_into(attribute_length as u32).unwrap());
-        AttributeNestMembers {}
+        let mut classes = vec![];
+        let number_of_classes = to_u16(&reader.read_n_bytes(2));
+        for _ in 0..number_of_classes {
+            classes.push(to_u16(&reader.read_n_bytes(2)));
+        }
+
+        AttributeNestMembers {
+            attribute_name_index,
+            attribute_length,
+            classes
+        }
     }
 
     /// Read the data blob as a record attribute
@@ -1526,7 +1532,15 @@ impl Attribute for AttributeNestHost {
     }
 }
 
-pub struct AttributeNestMembers {}
+/// The NestMembers attribute records the classes and interfaces that are authorized to claim
+/// membership in the nest hosted by the current class or interface
+///
+/// https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.29
+pub struct AttributeNestMembers {
+    attribute_name_index: u16,
+    attribute_length: u32,
+    classes: Vec<u16>,
+}
 
 impl Attribute for AttributeNestMembers {
     fn as_concrete_type(&self) -> &dyn Any {
