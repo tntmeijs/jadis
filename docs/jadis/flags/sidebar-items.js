@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["class_access_flags",""],["field_access_flags",""],["method_access_flags",""],["method_parameter_access_flags",""],["module_exports_flags",""],["module_flags",""],["module_opens_flags",""],["module_requires_flags",""],["nested_class_access_flags",""]],"trait":[["Flags","Base trait for all flag types"]]});

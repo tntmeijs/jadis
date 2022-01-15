@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["DisassemblerVisibility","Controls which access level shows up in the output"]],"struct":[["DisassemberConfig","Data needed to create a disassembler"],["Disassembler","Java Virtual Machine disassembler"]]});
+initSidebarItems({"enum":[["DisassemblerVisibility","Controls which access level shows up in the output"]],"struct":[["Disassembler","Java Virtual Machine disassembler"],["DisassemblerConfig","Data needed to create a disassembler"]]});

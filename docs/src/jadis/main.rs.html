@@ -246,15 +246,15 @@
 <span class="kw">use</span> <span class="ident">clap</span>::{<span class="ident">App</span>, <span class="ident">AppSettings</span>, <span class="ident">Arg</span>};
 
 <span class="kw">use</span> <span class="ident">byte_reader::ByteReader</span>;
-<span class="kw">use</span> <span class="ident">disassembler</span>::{<span class="ident">DisassemberConfig</span>, <span class="ident">Disassembler</span>, <span class="ident">DisassemblerVisibility</span>};
+<span class="kw">use</span> <span class="ident">disassembler</span>::{<span class="ident">DisassemblerConfig</span>, <span class="ident">Disassembler</span>, <span class="ident">DisassemblerVisibility</span>};
 
-<span class="kw">mod</span> <span class="ident">access_flags</span>;
 <span class="kw">mod</span> <span class="ident">attribute</span>;
 <span class="kw">mod</span> <span class="ident">byte_reader</span>;
 <span class="kw">mod</span> <span class="ident">class_file</span>;
 <span class="kw">mod</span> <span class="ident">constant_pool</span>;
 <span class="kw">mod</span> <span class="ident">disassembler</span>;
 <span class="kw">mod</span> <span class="ident">field</span>;
+<span class="kw">mod</span> <span class="ident">flags</span>;
 <span class="kw">mod</span> <span class="ident">method</span>;
 <span class="kw">mod</span> <span class="ident">utils</span>;
 
@@ -369,7 +369,7 @@
         )
         .<span class="ident">get_matches</span>();
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">disassembler_config</span> <span class="op">=</span> <span class="ident">DisassemberConfig::new</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">disassembler_config</span> <span class="op">=</span> <span class="ident">DisassemblerConfig::new</span>();
 
     <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;verbose&quot;</span>) {
         <span class="comment">//</span>

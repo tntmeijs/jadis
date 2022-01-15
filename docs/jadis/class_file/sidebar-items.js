@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["MAGIC_NUMBER",""],["SIZE_BYTES_U16",""],["SIZE_BYTES_U32",""]],"struct":[["ClassFile","JVM class file representation"]]});
+initSidebarItems({"constant":[["MAGIC_NUMBER",""]],"struct":[["ClassFile","JVM class file representation"]]});

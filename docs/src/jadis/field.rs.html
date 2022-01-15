@@ -61,10 +61,10 @@
 <span class="doccomment">//! Reference: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.5</span>
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">access_flags::FieldAccessFlags</span>, <span class="ident">attribute::AttributeInfo</span>, <span class="ident">byte_reader::ByteReader</span>,
+    <span class="ident">attribute::AttributeInfo</span>, <span class="ident">byte_reader::ByteReader</span>,
     <span class="ident">constant_pool::ConstantPoolContainer</span>, <span class="ident">utils::to_u16</span>,
 };
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::access_flags::Flags</span>;
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::flags</span>::{<span class="ident">FieldAccessFlags</span>, <span class="ident">Flags</span>};
 
 <span class="doccomment">/// Represents a field on a class or interface</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FieldInfo</span> {

@@ -1699,7 +1699,7 @@
     <span class="ident">constant_pool::ConstantPoolContainer</span>,
     <span class="ident">utils</span>::{<span class="ident">to_u16</span>, <span class="ident">to_u32</span>},
 };
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::access_flags</span>::{<span class="ident">Flags</span>, <span class="ident">MethodParameterAccessFlags</span>, <span class="ident">ModuleExportsFlags</span>, <span class="ident">ModuleFlags</span>, <span class="ident">ModuleOpensFlags</span>, <span class="ident">ModuleRequiresFlags</span>, <span class="ident">NestedClassAccessFlags</span>};
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::flags</span>::{<span class="ident">Flags</span>, <span class="ident">MethodParameterAccessFlags</span>, <span class="ident">ModuleExportsFlags</span>, <span class="ident">ModuleFlags</span>, <span class="ident">ModuleOpensFlags</span>, <span class="ident">ModuleRequiresFlags</span>, <span class="ident">NestedClassAccessFlags</span>};
 
 <span class="doccomment">/// Base trait to store specialised attributes</span>
 <span class="kw">trait</span> <span class="ident">Attribute</span> {
@@ -2439,19 +2439,19 @@
             <span class="kw">let</span> <span class="ident">signature_index</span> <span class="op">=</span> <span class="ident">to_u16</span>(<span class="kw-2">&amp;</span><span class="ident">reader</span>.<span class="ident">read_n_bytes</span>(<span class="number">2</span>));
             <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">to_u16</span>(<span class="kw-2">&amp;</span><span class="ident">reader</span>.<span class="ident">read_n_bytes</span>(<span class="number">2</span>));
 
-            <span class="ident">local_variable_type_table</span>.<span class="ident">push</span>(<span class="ident">LocalVariableTypeTableEntry</span>{
+            <span class="ident">local_variable_type_table</span>.<span class="ident">push</span>(<span class="ident">LocalVariableTypeTableEntry</span> {
                 <span class="ident">start_pc</span>,
                 <span class="ident">length</span>,
                 <span class="ident">name_index</span>,
                 <span class="ident">signature_index</span>,
-                <span class="ident">index</span>
+                <span class="ident">index</span>,
             });
         }
 
         <span class="ident">AttributeLocalVariableTypeTable</span> {
             <span class="ident">attribute_name_index</span>,
             <span class="ident">attribute_length</span>,
-            <span class="ident">local_variable_type_table</span>
+            <span class="ident">local_variable_type_table</span>,
         }
     }
 

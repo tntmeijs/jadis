@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["class_access",""],["field_access",""],["method_access",""],["method_parameter",""],["module",""],["module_exports",""],["module_opens",""],["module_requires",""],["nested_class",""]]});
